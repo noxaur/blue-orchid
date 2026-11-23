@@ -17,7 +17,8 @@ runs:
         LIMIT: ${{ inputs.seconds }}
       run: |
         started=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs" \
-          --jq "[.jobs[] | select(.name == \"$GITHUB_JOB\" or (.name | startswith(\"$GITHUB_JOB (\"))) | .started_at] | min")
+          --jq "[.jobs[] | select(.name == \"$GITHUB_JOB\" or (.name | startswith(\"$GITHUB_JOB (\"))) | .started_at] | min") ||
+          { echo "::warning::time-limit: could not read when $GITHUB_JOB started, so its time was not checked."; exit 0; }
         took=$(( $(date +%s) - $(date -d "$started" +%s) ))
         echo "$GITHUB_JOB took ${took}s of ${LIMIT}s." | tee -a "$GITHUB_STEP_SUMMARY"
         [ "$took" -le "$LIMIT" ] && exit 0

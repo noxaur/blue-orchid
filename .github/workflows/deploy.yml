@@ -43,7 +43,8 @@ jobs:
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           # A rerun of ci on an older commit must not deploy it over a newer one, whose migrations stay applied.
-          if [ "$(git ls-remote origin refs/heads/main | cut -f1)" != "$HEAD_SHA" ]; then
+          tip=$(git ls-remote --exit-code origin refs/heads/main)
+          if [ "${tip%%[[:space:]]*}" != "$HEAD_SHA" ]; then
             echo "deploy: skipped, $HEAD_SHA is no longer the tip of main." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi

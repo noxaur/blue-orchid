@@ -7,7 +7,8 @@ import { execFileSync } from "node:child_process";
 export const label = "human review needed";
 
 const code = /\.(ts|mts|cts|tsx|js|mjs|cjs|jsx)$/;
-const marker = /oxlint-disable|eslint-disable|@ts-(ignore|expect-error|nocheck)\b/;
+// A directive starts a comment, or a line inside a block comment, so a string that names one is not a suppression.
+const marker = /(^|\/\/|\/\*)\s*(oxlint-disable|eslint-disable|@ts-(ignore|expect-error|nocheck)\b)/;
 
 export const added = (diff: string): ReadonlyArray<string> => {
   const found: Array<string> = [];
@@ -36,7 +37,7 @@ export const added = (diff: string): ReadonlyArray<string> => {
     if (header) {
       continue;
     }
-    if (text.startsWith("+") && code.test(file) && marker.test(text)) {
+    if (text.startsWith("+") && code.test(file) && marker.test(text.slice(1))) {
       found.push(`${file}:${line}`);
     }
     if (text.startsWith("+") || text.startsWith(" ")) {
@@ -56,6 +57,7 @@ export const unexplained = (found: ReadonlyArray<string>, body: string): Readonl
       (text) =>
         named.test(text) &&
         text
+          .replace(at, "")
           .replace(/\S*:\d+\S*/g, "")
           .split(/\W+/)
           .filter(Boolean).length >= 3,
