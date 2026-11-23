@@ -20,7 +20,7 @@ remove the rule.
 | Alchemy declares only what Void does not own                                          | `orchid/infra-owns-extras-only`                                                  |
 | Every query the website sends is valid against the schema                             | `packages/graphql/src/operations.test.ts`                                        |
 | The API runs only the website's operations                                            | `onlyKnownOperations` in `packages/graphql/src/handler.ts`, `handler.test.ts`    |
-| A schedule change becomes exactly one update, and each update reaches a follower once | `sync.test.ts`, `deliver.test.ts`                                                |
+| A schedule change becomes exactly one update, and each update reaches a follower once | `sync.test.ts`, `deliver.test.ts`, and `store.test.ts` on local D1               |
 | Every job has a cron file, and every cron file runs a job                             | `apps/tracker/test/crons.test.ts`                                                |
 | Every chat command fits platform limits and is registered with Discord                | `commands.test.ts`, `routes.test.ts`                                             |
 | Every platform has a messenger                                                        | the `Messengers` type in `packages/core/src/ports/Messengers.ts`                 |
