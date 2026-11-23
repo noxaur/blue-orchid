@@ -1,0 +1,21 @@
+name: Bug report
+description: Something in blue-orchid doesn't work
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: What you did
+      description: On the website, in the bot or through the API.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: What happened instead
+      description: Add a screenshot, the show and your time zone if a time looks wrong.
+    validations:
+      required: true

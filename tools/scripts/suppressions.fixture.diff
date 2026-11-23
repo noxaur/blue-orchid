@@ -1,0 +1,56 @@
+diff --git a/packages/core/src/a.ts b/packages/core/src/a.ts
+index 1111111..2222222 100644
+--- a/packages/core/src/a.ts
++++ b/packages/core/src/a.ts
+@@ -1,4 +1,5 @@
+ export const a = 1;
+-// oxlint-disable-next-line no-console -- gone
++
++// oxlint-disable-next-line no-console -- the one place that logs
+ console.log(a);
+@@ -20,2 +21,4 @@ export const g = 2;
+ const x = 1;
++// @ts-expect-error the library's types are wrong
++const y: string = x;
+\ No newline at end of file
+diff --git a/packages/web/src/b.tsx b/packages/web/src/b.tsx
+new file mode 100644
+--- /dev/null
++++ b/packages/web/src/b.tsx
+@@ -0,0 +1,3 @@
++export const B = () => null;
++// eslint-disable-next-line no-console -- the one place that logs
++console.log(1);
+diff --git a/docs/c.md b/docs/c.md
+--- a/docs/c.md
++++ b/docs/c.md
+@@ -1 +1,2 @@
+ # C
++Never write oxlint-disable or @ts-ignore.
+diff --git a/apps/tracker/old.ts b/apps/tracker/old.ts
+deleted file mode 100644
+--- a/apps/tracker/old.ts
++++ /dev/null
+@@ -1 +0,0 @@
+-// oxlint-disable-next-line no-console -- gone
+diff --git a/packages/web/src/e.jsx b/packages/web/src/e.jsx
+--- a/packages/web/src/e.jsx
++++ b/packages/web/src/e.jsx
+@@ -1,1 +1,5 @@
+ let count = 0;
++++ count;
++/*
++  oxlint-disable no-console
++*/
+diff --git a/tools/f g.ts b/tools/f g.ts
+--- a/tools/f g.ts
++++ b/tools/f g.ts	
+@@ -1,1 +1,3 @@
+ let a = 0;
++// @ts-nocheck
++/* @ts-ignore */
+diff --git "a/tools/\303\246.cjs" "b/tools/\303\246.cjs"
+--- "a/tools/\303\246.cjs"
++++ "b/tools/\303\246.cjs"
+@@ -0,0 +1,1 @@
++// eslint-disable-next-line no-console -- x
