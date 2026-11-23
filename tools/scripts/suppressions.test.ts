@@ -14,6 +14,7 @@ test("finds each suppression a diff adds to code, at its line in the new file", 
     "packages/web/src/e.jsx:4",
     "tools/f g.ts:2",
     "tools/f g.ts:3",
+    "tools/f g.ts:5",
     "tools/\\303\\246.cjs:1",
   ]);
 });
@@ -33,6 +34,7 @@ test("a suppression is explained by a body line that names where it is and gives
     "packages/web/src/b.tsx:2",
     "packages/web/src/e.jsx:4",
     "tools/f g.ts:2",
+    "tools/f g.ts:5",
     "tools/\\303\\246.cjs:1",
   ]);
 });

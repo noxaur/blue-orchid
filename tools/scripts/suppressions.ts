@@ -8,7 +8,7 @@ export const label = "human review needed";
 
 const code = /\.(ts|mts|cts|tsx|js|mjs|cjs|jsx)$/;
 // A directive starts a comment, or a line inside a block comment, so a string that names one is not a suppression.
-const marker = /(^|\/\/|\/\*)\s*(oxlint-disable|eslint-disable|@ts-(ignore|expect-error|nocheck)\b)/;
+const marker = /(^|\/\/|\/\*+)\s*(oxlint-disable|eslint-disable|@ts-(ignore|expect-error|nocheck)\b)/;
 
 export const added = (diff: string): ReadonlyArray<string> => {
   const found: Array<string> = [];

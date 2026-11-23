@@ -45,11 +45,12 @@ diff --git a/packages/web/src/e.jsx b/packages/web/src/e.jsx
 diff --git a/tools/f g.ts b/tools/f g.ts
 --- a/tools/f g.ts
 +++ b/tools/f g.ts	
-@@ -1,1 +1,4 @@
+@@ -1,1 +1,5 @@
  let a = 0;
 +// @ts-nocheck
 +/* @ts-ignore */
 +const marker = /oxlint-disable|@ts-ignore/;
++/** @ts-ignore */
 diff --git "a/tools/\303\246.cjs" "b/tools/\303\246.cjs"
 --- "a/tools/\303\246.cjs"
 +++ "b/tools/\303\246.cjs"
