@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "skills": {
+    "pr": {
+      "source": "noxaur/skills",
+      "commit": "95dd408279ae2c3ee94ef104cba326110b952e01",
+      "sourceType": "github",
+      "skillPath": "pr/SKILL.md",
+      "computedHash": "c5e0445835fad21d46e3c2fe4fa47c405d6ad1c8bddc931de3207618deec21c0"
+    }
+  }
+}

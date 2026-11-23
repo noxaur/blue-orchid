@@ -9,6 +9,8 @@ const generated = [
   "**/.alchemy/**",
   "**/db/migrations/**",
 ];
+/** Skills installed from another repo and pinned in skills-lock.json. Change them upstream, not here. */
+const vendored = ["**/.agents/skills/**"];
 const tests = ["**/*.test.ts", "**/*.test.tsx"];
 
 /** Wiring code: the only places that may run Effects or provide layers. Keep this list short. */
@@ -82,7 +84,7 @@ export default defineConfig({
   },
   fmt: {
     printWidth: 120,
-    ignorePatterns: generated,
+    ignorePatterns: [...generated, ...vendored],
   },
   staged: {
     "*": "vp check --fix",

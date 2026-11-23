@@ -92,9 +92,11 @@ New user-facing behaviour, a scheduled job or a chat platform each has a skill i
 
 ## Branches and pull requests
 
-- Use a short branch name of at most three hyphenated words, such as `session-recovery` or `fix-scroll-state`.
+- Make a PR only when asked, and always through the [`pr` skill](.agents/skills/pr/SKILL.md). It sets the branch
+  name, title and description, and how to keep the PR up to date until it merges.
 - Use conventional commit titles: `type(scope): summary`.
-- Make a PR only when asked.
+- The `pr` skill comes from `noxaur/skills` and is pinned in `skills-lock.json`. Update it with
+  `npx skills update pr`, never by editing it here.
 
 ## Code and residue
 
