@@ -35,7 +35,7 @@ jobs:
               await github.rest.issues.addLabels({ owner, repo, issue_number, labels: [label] })
             }
 
-  suppressions:
+  human-review:
     if: github.event_name == 'pull_request_target'
     runs-on: ubuntu-latest
     timeout-minutes: 2
@@ -48,7 +48,7 @@ jobs:
       - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
         with:
           install_args: node
-      - run: node tools/scripts/suppressions.ts
+      - run: node tools/scripts/human-review.ts
         env:
           GH_TOKEN: ${{ github.token }}
           PR: ${{ github.event.pull_request.number }}

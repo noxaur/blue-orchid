@@ -58,8 +58,6 @@ errors, `yield* DateTime.now` for time. Effects run only in the composition root
 lists. Your memory of Effect v3 is wrong here: read `packages/core/node_modules/effect/ai-docs/` and the source.
 Void's docs for the installed version are in `apps/tracker/node_modules/void/docs/`.
 
-New user-facing behaviour, a scheduled job or a chat platform each has a skill in `.claude/skills/`; follow it.
-
 ## Hazards
 
 1. **Deploying.** `void deploy` and `void secret put` act on the live Cloudflare account and its D1 data. Run

@@ -110,6 +110,7 @@ export default defineConfig({
           "knip",
           "sherif",
           "node tools/scripts/docs.ts",
+          "node tools/scripts/skills.ts",
           "vp test run",
         ],
         cache: false,

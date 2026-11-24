@@ -2,22 +2,12 @@
  * Checks the docs agents rely on: every page in docs/ is linked from docs/README.md, and every relative link in
  * docs/, AGENTS.md files and skills points at a file that exists.
  */
-import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 
-const root = join(import.meta.dirname, "../..");
-const skip = new Set(["node_modules", ".git", ".void", "dist", ".cloudflare", ".alchemy"]);
+import { root, walk } from "./files.ts";
 
-const walk = (dir: string): ReadonlyArray<string> =>
-  readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
-    if (skip.has(entry.name)) {
-      return [];
-    }
-    const path = join(dir, entry.name);
-    return entry.isDirectory() ? walk(path) : [path];
-  });
-
-const markdown = walk(root).filter(
+const markdown = walk().filter(
   (path) =>
     path.endsWith(".md") && (path.includes("/docs/") || path.endsWith("AGENTS.md") || path.includes("/.claude/")),
 );
