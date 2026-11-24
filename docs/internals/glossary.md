@@ -20,4 +20,7 @@
 - **Chat identity**: a person on one chat platform, written `platform:userId`.
 - **Delivery**: one update sent to one follower.
 - **Platform**: a chat service the bot runs on. Discord now.
+- **Reply**: what the bot answers, as data, such as `Followed` or `ShowUpdate`. Each platform draws it with its
+  own view.
+- **Action**: what a button or menu in a reply does, such as `unfollow`, run with the show ids the control carries.
 - **Job**: work that runs on a cron schedule.

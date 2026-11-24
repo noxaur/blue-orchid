@@ -45,7 +45,7 @@ describe("syncSchedule then deliverNotifications", () => {
       const sent = yield* memory.sent;
       expect(sent).toHaveLength(1);
       expect(sent[0]?.userId).toBe("1001");
-      expect(sent[0]?.message.text).toBe(`${frieren.title} has a new time.`);
+      expect(sent[0]?.reply).toMatchObject({ _tag: "ShowUpdate", update: { change: { _tag: "EpisodeRescheduled" } } });
     }),
   );
 

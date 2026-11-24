@@ -1,38 +1,31 @@
-import type { Message, MessageEntry } from "@blue-orchid/core";
-import { DateTime } from "effect";
+import type { Reply, ReplyKind } from "@blue-orchid/core";
+import type { APIContainerComponent } from "discord-api-types/v10";
+import { Match } from "effect";
 
-/** Discord's limit for one message. */
-const maxLength = 2000;
+import { accent, clip, escape, notice } from "./views/blocks.ts";
+import { chooseView } from "./views/choose.ts";
+import { followedView } from "./views/followed.ts";
+import { followingView } from "./views/following.ts";
+import { scheduleView } from "./views/schedule.ts";
+import { showUpdateView } from "./views/showUpdate.ts";
+import { unfollowedView } from "./views/unfollowed.ts";
 
-const escape = (text: string) => text.replace(/[\\*_~`|>]/g, (char) => `\\${char}`);
+type Views = { readonly [K in ReplyKind]: (reply: Extract<Reply, { _tag: K }>) => APIContainerComponent };
 
-/** `<t:…>` renders in each reader's own timezone and language. */
-const stamp = (at: DateTime.Utc, style: "f" | "R") => `<t:${Math.floor(DateTime.toEpochMillis(at) / 1000)}:${style}>`;
-
-const line = (entry: MessageEntry) => {
-  const was = entry.previousAt === null ? "" : ` (was ${stamp(entry.previousAt, "f")})`;
-  return `**${escape(entry.title)}** · ${escape(entry.detail)} · ${stamp(entry.at, "f")} ${stamp(entry.at, "R")}${was}`;
+/** One view per kind of reply. Each lives in its own file under views/, so a layout changes in one place. */
+const views: Views = {
+  Schedule: scheduleView,
+  Followed: followedView,
+  Unfollowed: unfollowedView,
+  Choose: chooseView,
+  NoMatch: ({ query }) =>
+    notice(accent.neutral, `No show matches “${escape(clip(query, 200))}”`, "Try the English or Japanese title."),
+  Following: followingView,
+  ShowUpdate: showUpdateView,
+  MissingOption: ({ names }) => notice(accent.neutral, `Missing ${names.join(", ")}`, "Fill it in and try again."),
+  Trouble: () =>
+    notice(accent.error, "Something went wrong on our side", "Nothing was changed. Try again in a minute."),
 };
 
-/** Cuts at a whole code point, so an emoji is never split in half. */
-const fit = (text: string) => {
-  if (text.length <= maxLength) {
-    return text;
-  }
-  const cut = text.slice(0, maxLength - 1);
-  return `${/[\uD800-\uDBFF]$/.test(cut) ? cut.slice(0, -1) : cut}…`;
-};
-
-export const renderMessage = (message: Message): string => {
-  const lines = [fit(escape(message.text))];
-  for (const [index, entry] of message.entries.entries()) {
-    const next = line(entry);
-    const rest = message.entries.length - index;
-    const tail = `…and ${rest} more`;
-    if ([...lines, next, tail].join("\n").length > maxLength) {
-      return fit([...lines, tail].join("\n"));
-    }
-    lines.push(next);
-  }
-  return lines.join("\n");
-};
+/** A reply as the components of a Components V2 message. */
+export const renderReply = (reply: Reply): Array<APIContainerComponent> => [Match.valueTags(reply, views)];

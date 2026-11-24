@@ -21,7 +21,7 @@ path, so renaming the route cuts the bot off until the portal is updated.
 
 ## Register commands
 
-Discord shows only the slash commands it was last sent. After a command in `packages/core/src/chat/commands.ts`
+Discord shows only the slash commands it was last sent. After a command in `packages/core/src/chat/commands/`
 changes, send them:
 
 ```sh

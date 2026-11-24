@@ -1,6 +1,8 @@
-export { commands, isCommandName, type ChatCommand, type CommandName, type CommandServices } from "./chat/commands.ts";
-export { textMessage, type Message, type MessageEntry } from "./chat/Message.ts";
-export { followed, follow, unfollow } from "./follows/follows.ts";
+export { actions, isActionName, type ActionName, type ChatAction } from "./chat/actions.ts";
+export type { ChatCommand, CommandOption, CommandServices, OptionChoice } from "./chat/command.ts";
+export { commands, isCommandName, type CommandName } from "./chat/commands/index.ts";
+export { trouble, type Reply, type ReplyKind, type UpcomingShow } from "./chat/Reply.ts";
+export { choiceLimit, followed, follow, matchShow, unfollow } from "./follows/follows.ts";
 export { jobs, type Job, type JobName, type JobServices } from "./jobs.ts";
 export { deliverNotifications } from "./notifications/deliver.ts";
 export { importCatalog } from "./catalog/importCatalog.ts";

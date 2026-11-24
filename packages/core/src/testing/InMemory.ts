@@ -2,7 +2,7 @@ import type { ChatIdentity, Release, Show, ShowId, Update } from "@blue-orchid/d
 import { MessageNotSent, releaseKey, ShowNotFound } from "@blue-orchid/domain";
 import { DateTime, Effect, Layer, Ref } from "effect";
 
-import type { Message } from "../chat/Message.ts";
+import type { Reply } from "../chat/Reply.ts";
 import type { StoredRelease } from "../ports/Catalog.ts";
 import { Catalog } from "../ports/Catalog.ts";
 import { Messengers } from "../ports/Messengers.ts";
@@ -23,7 +23,7 @@ interface Delivery {
 
 export interface SentMessage {
   readonly userId: string;
-  readonly message: Message;
+  readonly reply: Reply;
 }
 
 const identityKey = (identity: ChatIdentity) => `${identity.platform}:${identity.userId}`;
@@ -199,10 +199,10 @@ export const makeInMemory = Effect.fn("InMemory.make")(function* (seed: {
   });
 
   const recording = {
-    send: (userId: string, message: Message) => {
+    send: (userId: string, reply: Reply) => {
       const permanent = seed.failFor?.get(userId);
       return permanent === undefined
-        ? Ref.update(sent, (all) => [...all, { userId, message }])
+        ? Ref.update(sent, (all) => [...all, { userId, reply }])
         : Effect.fail(new MessageNotSent({ platform: "test", permanent, cause: "failFor" }));
     },
   };

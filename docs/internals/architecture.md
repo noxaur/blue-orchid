@@ -8,8 +8,9 @@ cron jobs. Every surface reads from our own D1 database. None of them calls a sc
 runtime, and the use case reads the Catalog port, which `apps/tracker/server/store.ts` implements on D1.
 
 **A slash command.** Discord posts to `/api/discord/interactions`. The Discord adapter verifies the signature,
-runs the matching command from `packages/core/src/chat/commands.ts`, and renders its reply. Commands never fail:
-every error becomes a reply.
+runs the matching command from `packages/core/src/chat/commands/`, and renders its reply with that reply's view in
+`packages/discord/src/views/`. Commands never fail: every error becomes a reply. A button or menu in a reply runs a
+core action from `packages/core/src/chat/actions.ts`, and its reply replaces the message the control was on.
 
 **Sync, every 30 minutes.** `sync-schedule` asks each schedule source for the next five weeks and records an
 update for each release that is new or has moved. Each release counts its changes in `revision`, and an update's

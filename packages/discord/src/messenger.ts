@@ -1,10 +1,11 @@
 import type { Messenger } from "@blue-orchid/core";
 import { MessageNotSent } from "@blue-orchid/domain";
+import { MessageFlags } from "discord-api-types/v10";
 import { Effect, Option, Redacted, Schema } from "effect";
 import { HttpClient, HttpClientError, HttpClientRequest, HttpClientResponse } from "effect/http";
 
 import { discordApi, DiscordConfig } from "./DiscordConfig.ts";
-import { renderMessage } from "./render.ts";
+import { renderReply } from "./render.ts";
 
 const DmChannel = Schema.Struct({ id: Schema.String });
 
@@ -27,7 +28,7 @@ export const makeDiscordMessenger = Effect.gen(function* () {
   const client = (yield* HttpClient.HttpClient).pipe(HttpClient.filterStatusOk);
 
   const messenger: Messenger = {
-    send: (userId, message) =>
+    send: (userId, reply) =>
       Effect.gen(function* () {
         if (Option.isNone(settings)) {
           return yield* Effect.fail(
@@ -50,7 +51,11 @@ export const makeDiscordMessenger = Effect.gen(function* () {
         );
         yield* HttpClientRequest.post(`${discordApi}/channels/${channel.id}/messages`).pipe(
           authorized,
-          HttpClientRequest.bodyJsonUnsafe({ content: renderMessage(message), allowed_mentions: { parse: [] } }),
+          HttpClientRequest.bodyJsonUnsafe({
+            flags: MessageFlags.IsComponentsV2,
+            components: renderReply(reply),
+            allowed_mentions: { parse: [] },
+          }),
           client.execute,
         );
       }).pipe(Effect.mapError(notSent)),

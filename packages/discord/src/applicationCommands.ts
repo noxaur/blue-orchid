@@ -11,7 +11,7 @@ import { HttpClient, HttpClientRequest } from "effect/http";
 
 import { discordApi, DiscordConfig, DiscordNotConfigured } from "./DiscordConfig.ts";
 
-/** Core's commands as Discord slash commands, usable in servers, in the bot's DMs and when the user installs the app. */
+/** Core's commands as Discord slash commands. The bot is DM-first: they run only in its DMs, however it was installed. */
 export const applicationCommands = (
   table: Readonly<Record<string, ChatCommand>>,
 ): RESTPutAPIApplicationCommandsJSONBody =>
@@ -20,12 +20,15 @@ export const applicationCommands = (
     name,
     description: command.description,
     integration_types: [ApplicationIntegrationType.GuildInstall, ApplicationIntegrationType.UserInstall],
-    contexts: [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel],
+    contexts: [InteractionContextType.BotDM],
     options: command.options.map((option) => ({
       type: ApplicationCommandOptionType.String,
       name: option.name,
       description: option.description,
-      required: true,
+      required: option.required,
+      ...(option.choices.length === 0
+        ? {}
+        : { choices: option.choices.map((choice) => ({ name: choice.label, value: choice.value })) }),
     })),
   }));
 

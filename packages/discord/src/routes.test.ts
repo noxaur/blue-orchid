@@ -1,7 +1,7 @@
 import { commands } from "@blue-orchid/core";
 import { frieren, makeInMemory } from "@blue-orchid/core/testing";
 import { describe, expect, it } from "@effect/vitest";
-import { InteractionResponseType, InteractionType } from "discord-api-types/v10";
+import { InteractionContextType, InteractionResponseType, InteractionType, MessageFlags } from "discord-api-types/v10";
 import { Context, Effect, Layer, Option, Redacted } from "effect";
 import { HttpRouter, HttpServer } from "effect/http";
 
@@ -68,7 +68,7 @@ describe("DiscordRoutes", () => {
     }).pipe(Effect.scoped),
   );
 
-  it.effect("runs /follow for the user who sent it", () =>
+  it.effect("runs /follow for the user who sent it, as a Components V2 message", () =>
     Effect.gen(function* () {
       const { send } = yield* setup;
       const answer = yield* send({
@@ -76,11 +76,68 @@ describe("DiscordRoutes", () => {
         user: { id: "77" },
         data: { name: "follow", options: [{ name: "show", type: 3, value: "frieren" }] },
       });
-      expect(answer.json).toMatchObject({ data: { content: `You now follow Frieren: Beyond Journey's End.` } });
+      expect(answer.json).toMatchObject({
+        type: InteractionResponseType.ChannelMessageWithSource,
+        data: { flags: MessageFlags.IsComponentsV2 },
+      });
+      expect(JSON.stringify(answer.json)).toContain(`Now following\\n## Frieren: Beyond Journey's End`);
+      expect(JSON.stringify(answer.json)).toContain(`"custom_id":"unfollow:${frieren.id}"`);
     }).pipe(Effect.scoped),
   );
 
-  it("registers every core command", () => {
-    expect(applicationCommands(commands).map((command) => command.name)).toEqual(Object.keys(commands));
+  it.effect("turns the message into the unfollowed one when its Unfollow button is pressed", () =>
+    Effect.gen(function* () {
+      const { send } = yield* setup;
+      const press = (customId: string) =>
+        send({
+          type: InteractionType.MessageComponent,
+          user: { id: "77" },
+          data: { custom_id: customId, component_type: 2 },
+        });
+      yield* press(`follow:${frieren.id}`);
+      const answer = yield* press(`unfollow:${frieren.id}`);
+      expect(answer.json).toMatchObject({
+        type: InteractionResponseType.UpdateMessage,
+        data: { flags: MessageFlags.IsComponentsV2 },
+      });
+      expect(JSON.stringify(answer.json)).toContain("You won't get messages about this show.");
+      const stale = yield* press("rename:whatever");
+      expect(JSON.stringify(stale.json)).toContain("That button no longer works");
+    }).pipe(Effect.scoped),
+  );
+
+  it.effect("unfollows the shows picked in the following menu", () =>
+    Effect.gen(function* () {
+      const { send } = yield* setup;
+      yield* send({
+        type: InteractionType.MessageComponent,
+        user: { id: "77" },
+        data: { custom_id: `follow:${frieren.id}` },
+      });
+      const answer = yield* send({
+        type: InteractionType.MessageComponent,
+        user: { id: "77" },
+        data: { custom_id: "unfollowMany", component_type: 3, values: [frieren.id] },
+      });
+      expect(JSON.stringify(answer.json)).toContain("You don't follow any shows yet");
+    }).pipe(Effect.scoped),
+  );
+
+  it("registers every core command, for DMs only, with /schedule's shows as an optional choice", () => {
+    const registered = applicationCommands(commands);
+    expect(registered.map((command) => command.name)).toEqual(Object.keys(commands));
+    expect(registered.find((command) => command.name === "schedule")).toMatchObject({
+      contexts: [InteractionContextType.BotDM],
+      options: [
+        {
+          name: "shows",
+          required: false,
+          choices: [
+            { name: "Following", value: "following" },
+            { name: "All", value: "all" },
+          ],
+        },
+      ],
+    });
   });
 });

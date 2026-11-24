@@ -1,20 +1,91 @@
-import { textMessage } from "@blue-orchid/core";
+import type { Reply } from "@blue-orchid/core";
+import { release, show as showWith } from "@blue-orchid/core/testing";
+import { ShowId, Update, UpdateId } from "@blue-orchid/domain";
 import { describe, expect, it } from "@effect/vitest";
+import { ComponentType } from "discord-api-types/v10";
+import { DateTime } from "effect";
 
-import { renderMessage } from "./render.ts";
+import { renderReply } from "./render.ts";
 
-describe("renderMessage", () => {
-  it("stays within Discord's 2,000 characters when the text alone is longer", () => {
-    const titles = Array.from(
-      { length: 30 },
-      (_, index) => `A_Very_Long_Show_Title_Number_${index}_With_Marks_And_A_Subtitle_That_Goes_On`,
-    );
-    const rendered = renderMessage(textMessage(`You follow: ${titles.join(", ")}.`));
-    expect(rendered.length).toBeLessThanOrEqual(2000);
-    expect(rendered.endsWith("…")).toBe(true);
+interface Node {
+  readonly type: number;
+  readonly content?: string;
+  readonly components?: ReadonlyArray<Node>;
+  readonly accessory?: Node;
+}
+
+/** Discord counts nested components too, and caps the text of all text displays together. */
+const measure = (nodes: ReadonlyArray<Node>): { components: number; text: number } =>
+  nodes.reduce(
+    (total, node) => {
+      const inner = measure([...(node.components ?? []), ...(node.accessory === undefined ? [] : [node.accessory])]);
+      return {
+        components: total.components + 1 + inner.components,
+        text: total.text + (node.content?.length ?? 0) + inner.text,
+      };
+    },
+    { components: 0, text: 0 },
+  );
+
+const longShow = (index: number) =>
+  showWith({
+    id: ShowId.make(`anilist:${index}`),
+    siteIds: [ShowId.make(`anilist:${index}`)],
+    title: `A Very Long Show Title Number ${index} With A Subtitle That Goes On And On Until It Fills A Line`.padEnd(
+      180,
+      "!",
+    ),
+    imageUrl: `https://img.anili.st/media/${index}.jpg`,
   });
 
-  it("never splits an emoji at the cut", () => {
-    expect(renderMessage(textMessage(`${"a".repeat(1998)}😀abc`))).toBe(`${"a".repeat(1998)}…`);
+const shows = Array.from({ length: 60 }, (_, index) => longShow(index));
+const releases = shows.map((show) => ({ show, release: release({ showId: show.id }) }));
+const at = DateTime.makeUnsafe("2026-01-09T15:00:00Z");
+
+const moved: Reply = {
+  _tag: "ShowUpdate",
+  show: longShow(1),
+  update: new Update({
+    id: UpdateId.make("u1"),
+    detectedAt: at,
+    change: { _tag: "EpisodeRescheduled", release: release(), previousAirsAt: at },
+  }),
+};
+
+const biggest: ReadonlyArray<Reply> = [
+  { _tag: "Schedule", scope: "following", releases },
+  { _tag: "Schedule", scope: "all", releases },
+  { _tag: "Following", shows: shows.map((show) => ({ show, next: release({ showId: show.id }) })) },
+  { _tag: "Choose", action: "follow", query: "x".repeat(500), shows: shows.slice(0, 25) },
+  { _tag: "Followed", show: longShow(1), next: release() },
+  { _tag: "Unfollowed", show: longShow(1), wasFollowing: true },
+  moved,
+  { _tag: "NoMatch", query: "x".repeat(500) },
+];
+
+describe("renderReply", () => {
+  it.each(biggest.map((reply) => [reply._tag, reply] as const))(
+    "keeps the largest %s within Discord's 40 components and 4,000 characters",
+    (_, reply) => {
+      const size = measure(renderReply(reply));
+      expect(size.components).toBeLessThanOrEqual(40);
+      expect(size.text).toBeLessThanOrEqual(4000);
+    },
+  );
+
+  it("strikes through the old time of a moved episode, as a timestamp", () => {
+    const [container] = renderReply(moved);
+    const texts = JSON.stringify(container);
+    expect(texts).toContain("~~<t:1767970800:F>~~");
+  });
+
+  it("puts each show's cover beside it and links to AniList", () => {
+    const [container] = renderReply({ _tag: "Followed", show: longShow(7), next: undefined });
+    expect(container?.components[0]).toMatchObject({
+      type: ComponentType.Section,
+      accessory: { type: ComponentType.Thumbnail, media: { url: "https://img.anili.st/media/7.jpg" } },
+    });
+    expect(JSON.stringify(container)).toContain('"custom_id":"unfollow:anilist:7"');
+    expect(JSON.stringify(container)).toContain("https://anilist.co/anime/7");
   });
 });
