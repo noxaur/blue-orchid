@@ -1,4 +1,4 @@
-import { DiscordConfig, registerCommands } from "@blue-orchid/chat-discord";
+import { DiscordConfig, registerCommands } from "@blue-orchid/discord";
 import { commands } from "@blue-orchid/core";
 import { Effect, Exit, Layer, Option, Redacted } from "effect";
 import { FetchHttpClient } from "effect/http";

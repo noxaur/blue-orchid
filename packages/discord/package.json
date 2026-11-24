@@ -1,5 +1,5 @@
 {
-  "name": "@blue-orchid/chat-discord",
+  "name": "@blue-orchid/discord",
   "private": true,
   "type": "module",
   "exports": {

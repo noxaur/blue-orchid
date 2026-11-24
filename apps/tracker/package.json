@@ -13,8 +13,8 @@
     "discord:register": "node --env-file-if-exists=.env scripts/register-discord-commands.ts"
   },
   "dependencies": {
-    "@blue-orchid/chat-discord": "workspace:*",
     "@blue-orchid/core": "workspace:*",
+    "@blue-orchid/discord": "workspace:*",
     "@blue-orchid/domain": "workspace:*",
     "@blue-orchid/graphql": "workspace:*",
     "@blue-orchid/source-anilist": "workspace:*",

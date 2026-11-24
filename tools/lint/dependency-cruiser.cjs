@@ -30,12 +30,12 @@ const packages = {
     node: false,
     hint: "graphql turns core's use cases into the private API. It never runs Effects: resolvers hand them to context.run, which the app supplies.",
   },
-  "chat-discord": {
-    dir: "packages/chat-discord",
+  discord: {
+    dir: "packages/discord",
     workspace: ["core", "domain"],
     npm: ["effect", "discord-api-types"],
     node: false,
-    hint: "chat-discord adapts core's commands and Messenger port to Discord. Platform-neutral logic belongs in core.",
+    hint: "discord adapts core's commands and Messenger port to Discord. Platform-neutral logic belongs in core.",
   },
   "source-anilist": {
     dir: "packages/source-anilist",
@@ -53,7 +53,7 @@ const packages = {
   },
   tracker: {
     dir: "apps/tracker",
-    workspace: ["chat-discord", "core", "domain", "graphql", "source-anilist", "web"],
+    workspace: ["core", "discord", "domain", "graphql", "source-anilist", "web"],
     npm: "any",
     node: true,
     hint: "tracker is the Void app: it wires packages together and deploys them. Logic goes in a package.",

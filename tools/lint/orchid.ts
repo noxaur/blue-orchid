@@ -249,7 +249,7 @@ const noJsonParse = defineRule({
         context.report({
           node,
           message:
-            "Don't JSON.parse. Decode with a schema: `Schema.decodeUnknownEffect(Schema.fromJsonString(MySchema))(text)`, so bad input becomes a typed error (example: packages/chat-discord/src/interaction.ts).",
+            "Don't JSON.parse. Decode with a schema: `Schema.decodeUnknownEffect(Schema.fromJsonString(MySchema))(text)`, so bad input becomes a typed error (example: packages/discord/src/interaction.ts).",
         });
       },
     };

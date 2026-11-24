@@ -9,7 +9,7 @@ export interface DiscordSettings {
 
 /** None when the server has no Discord credentials: the endpoint answers 503 and messages stay pending. */
 export class DiscordConfig extends Context.Service<DiscordConfig, Option.Option<DiscordSettings>>()(
-  "orchid/chat-discord/DiscordConfig",
+  "orchid/discord/DiscordConfig",
 ) {}
 
 export const discordApi = "https://discord.com/api/v10";
