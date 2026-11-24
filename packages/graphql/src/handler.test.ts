@@ -14,8 +14,9 @@ const post = (query: string) =>
   });
 
 describe("makeGraphQLHandler", () => {
-  it.effect("runs the website's operations and refuses any other document", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "runs the website's operations and refuses any other document",
+    Effect.fn(function* () {
       const memory = yield* makeInMemory({});
       const context: GraphQLContext = {
         run: (effect) => Effect.runPromise(effect.pipe(Effect.provide(memory.layer))),

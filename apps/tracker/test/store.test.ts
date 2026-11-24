@@ -55,8 +55,9 @@ const show = (id: string, siteIds: ReadonlyArray<string> = []) =>
   });
 
 describe("store on D1", () => {
-  it.effect("syncs and delivers a moved episode to a follower once, and a second run changes nothing", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "syncs and delivers a moved episode to a follower once, and a second run changes nothing",
+    Effect.fn(function* () {
       yield* TestClock.setTime(DateTime.toEpochMillis(at("2026-01-05T00:00:00Z")));
       const store = yield* localStore;
       const memory = yield* makeInMemory({});
@@ -85,8 +86,9 @@ describe("store on D1", () => {
     }),
   );
 
-  it.effect("claims each delivery for one of two overlapping runs", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "claims each delivery for one of two overlapping runs",
+    Effect.fn(function* () {
       const store = yield* localStore;
       const now = yield* DateTime.now;
       const change = { _tag: "EpisodeScheduled" as const, release: release() };
@@ -106,8 +108,9 @@ describe("store on D1", () => {
     }),
   );
 
-  it.effect("keeps the newer time when an overlapping sync saves an older revision of a release", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "keeps the newer time when an overlapping sync saves an older revision of a release",
+    Effect.fn(function* () {
       const store = yield* localStore;
       const newer = release({ airsAt: at("2026-01-09T17:00:00Z") });
       const stored = yield* Effect.gen(function* () {
@@ -122,8 +125,9 @@ describe("store on D1", () => {
     }),
   );
 
-  it.effect("finds a show by any of its site ids, and a site id two shows claim goes to the one saved last", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "finds a show by any of its site ids, and a site id two shows claim goes to the one saved last",
+    Effect.fn(function* () {
       const store = yield* localStore;
       const found = yield* Effect.gen(function* () {
         const catalog = yield* Catalog;
@@ -139,8 +143,9 @@ describe("store on D1", () => {
     }),
   );
 
-  it.effect("saves a catalog slice's 1,000 shows, and more releases than one statement can bind", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "saves a catalog slice's 1,000 shows, and more releases than one statement can bind",
+    Effect.fn(function* () {
       const store = yield* localStore;
       const shows = Array.from({ length: 1000 }, (_, index) => show(`anilist:${index}`, [`myanimelist:${index}`]));
       const releases = shows.slice(0, 30).flatMap((each) =>

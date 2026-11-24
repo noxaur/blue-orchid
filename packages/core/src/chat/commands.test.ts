@@ -20,8 +20,9 @@ describe("commands", () => {
     }
   });
 
-  it.effect("follow then following lists the show", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "follow then following lists the show",
+    Effect.fn(function* () {
       const memory = yield* makeInMemory({ shows: [frieren] });
       const followed = yield* commands.follow.invoke({ show: "frieren" }, caller).pipe(Effect.provide(memory.layer));
       expect(followed.text).toBe(`You now follow ${frieren.title}.`);
@@ -30,8 +31,9 @@ describe("commands", () => {
     }),
   );
 
-  it.effect("answers instead of failing when an option is missing or nothing matches", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "answers instead of failing when an option is missing or nothing matches",
+    Effect.fn(function* () {
       const memory = yield* makeInMemory({ shows: [frieren] });
       const missing = yield* commands.follow.invoke({}, caller).pipe(Effect.provide(memory.layer));
       expect(missing.text).toBe("Missing show.");

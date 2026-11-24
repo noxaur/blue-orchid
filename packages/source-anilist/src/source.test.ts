@@ -53,8 +53,9 @@ const anilistAnswering = (pages: ReadonlyArray<unknown>) => {
 };
 
 describe("AniListCatalogLive", () => {
-  it.effect("reads every page of a slice into shows", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "reads every page of a slice into shows",
+    Effect.fn(function* () {
       const anilist = anilistAnswering([page(true, [goblin]), page(false, [announced])]);
       const shows = yield* CatalogSource.use((source) => source.fetch({ _tag: "Airing" })).pipe(
         Effect.provide(anilist.layer),
@@ -87,8 +88,9 @@ describe("AniListCatalogLive", () => {
     }),
   );
 
-  it.effect("skips a show the catalog can't hold and keeps the rest of the slice", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "skips a show the catalog can't hold and keeps the rest of the slice",
+    Effect.fn(function* () {
       const untitled = { ...goblin, id: 1, title: { english: "", romaji: null } };
       const anilist = anilistAnswering([page(false, [untitled, goblin])]);
       const shows = yield* CatalogSource.use((source) => source.fetch({ _tag: "Airing" })).pipe(
@@ -98,8 +100,9 @@ describe("AniListCatalogLive", () => {
     }),
   );
 
-  it.effect("asks for one start year as a FuzzyDateInt range", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "asks for one start year as a FuzzyDateInt range",
+    Effect.fn(function* () {
       const anilist = anilistAnswering([page(false, [])]);
       yield* CatalogSource.use((source) => source.fetch({ _tag: "Year", year: 2009 })).pipe(
         Effect.provide(anilist.layer),
@@ -108,8 +111,9 @@ describe("AniListCatalogLive", () => {
     }),
   );
 
-  it.effect("fails as SourceUnavailable when AniList answers something else", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "fails as SourceUnavailable when AniList answers something else",
+    Effect.fn(function* () {
       const anilist = anilistAnswering([{ errors: [{ message: "Too Many Requests." }] }]);
       const error = yield* Effect.flip(
         CatalogSource.use((source) => source.fetch({ _tag: "Upcoming" })).pipe(Effect.provide(anilist.layer)),

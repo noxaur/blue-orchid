@@ -9,8 +9,9 @@ import { nextRelease } from "./schedule.ts";
 const at = (iso: string) => DateTime.makeUnsafe(iso);
 
 describe("nextRelease", () => {
-  it.effect("is the earliest release that has not aired, and none once all have aired", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "is the earliest release that has not aired, and none once all have aired",
+    Effect.fn(function* () {
       const memory = yield* makeInMemory({
         shows: [frieren],
         releases: [

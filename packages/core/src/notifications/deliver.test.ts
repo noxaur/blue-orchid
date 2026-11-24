@@ -30,8 +30,9 @@ const setup = Effect.fn("setup")(function* (followers: ReadonlyArray<string>, fa
 });
 
 describe("deliverNotifications", () => {
-  it.effect("sends once when two runs overlap", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "sends once when two runs overlap",
+    Effect.fn(function* () {
       const memory = yield* setup(["1"]);
       yield* Effect.all([deliverNotifications(), deliverNotifications()], { concurrency: 2 }).pipe(
         Effect.provide(memory.layer),
@@ -40,8 +41,9 @@ describe("deliverNotifications", () => {
     }),
   );
 
-  it.effect("gives up a permanent failure without blocking the next follower", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "gives up a permanent failure without blocking the next follower",
+    Effect.fn(function* () {
       const memory = yield* setup(["blocked", "2"], new Map([["blocked", true]]));
       yield* deliverNotifications().pipe(Effect.provide(memory.layer));
       yield* TestClock.adjust(Duration.sum(claimLease, Duration.seconds(1)));
@@ -51,8 +53,9 @@ describe("deliverNotifications", () => {
     }),
   );
 
-  it.effect("retries a failure for now after the lease, up to the attempt limit", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "retries a failure for now after the lease, up to the attempt limit",
+    Effect.fn(function* () {
       const memory = yield* setup(["flaky"], new Map([["flaky", false]]));
       const attempts = [];
       for (let run = 0; run < maxAttempts + 2; run++) {
@@ -63,8 +66,9 @@ describe("deliverNotifications", () => {
     }),
   );
 
-  it.effect("stops reclaiming a delivery whose runs keep dying before they report", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "stops reclaiming a delivery whose runs keep dying before they report",
+    Effect.fn(function* () {
       const memory = yield* setup(["1"]);
       const claims = [];
       for (let run = 0; run < maxAttempts + 2; run++) {

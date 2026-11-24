@@ -26,8 +26,9 @@ const makeSource = Effect.fn("makeSource")(function* (initial: Release) {
 });
 
 describe("syncSchedule then deliverNotifications", () => {
-  it.effect("tells a follower once when an episode moves", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "tells a follower once when an episode moves",
+    Effect.fn(function* () {
       yield* TestClock.setTime(DateTime.toEpochMillis(at("2026-01-05T00:00:00Z")));
       const memory = yield* makeInMemory({ shows: [frieren], releases: [release()] });
       const source = yield* makeSource(release({ airsAt: at("2026-01-09T16:30:00Z") }));
@@ -48,8 +49,9 @@ describe("syncSchedule then deliverNotifications", () => {
     }),
   );
 
-  it.effect("records every move, even back to an earlier time", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "records every move, even back to an earlier time",
+    Effect.fn(function* () {
       const memory = yield* makeInMemory({
         shows: [frieren],
         releases: [release({ airsAt: at("2026-01-09T15:00:00Z") })],
@@ -65,8 +67,9 @@ describe("syncSchedule then deliverNotifications", () => {
     }),
   );
 
-  it.effect("keeps the first of two saves of the same revision, so the release matches its update", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "keeps the first of two saves of the same revision, so the release matches its update",
+    Effect.fn(function* () {
       const memory = yield* makeInMemory({ shows: [frieren], releases: [release()] });
       const save = (iso: string) =>
         Catalog.use((catalog) =>

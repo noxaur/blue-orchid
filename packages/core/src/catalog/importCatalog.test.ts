@@ -39,8 +39,9 @@ describe("sliceFor", () => {
 });
 
 describe("importCatalog", () => {
-  it.effect("stores the slice's shows, and a second run changes nothing", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "stores the slice's shows, and a second run changes nothing",
+    Effect.fn(function* () {
       yield* TestClock.setTime(DateTime.toEpochMillis(at("2026-11-23T00:00:00Z")));
       const memory = yield* makeInMemory({});
       const layer = Layer.merge(
@@ -57,8 +58,9 @@ describe("importCatalog", () => {
     }),
   );
 
-  it.effect("keeps the catalog as it was when the source fails", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "keeps the catalog as it was when the source fails",
+    Effect.fn(function* () {
       const memory = yield* makeInMemory({ shows: [frieren] });
       const layer = Layer.merge(
         memory.layer,

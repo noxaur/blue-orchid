@@ -38,8 +38,8 @@ const handle = (request: HttpServerRequest.HttpServerRequest) =>
  * The endpoint Discord posts slash commands to. Set it as the Interactions Endpoint URL in the developer portal.
  * The services are taken when the layer is built, so each request needs nothing extra.
  */
-export const DiscordRoutes = HttpRouter.use((router) =>
-  Effect.gen(function* () {
+export const DiscordRoutes = HttpRouter.use(
+  Effect.fn("Discord.addRoutes")(function* (router) {
     const services = yield* Effect.context<CommandServices | DiscordConfig>();
     yield* router.add("POST", interactionsPath, (request) => handle(request).pipe(Effect.provideContext(services)));
   }),

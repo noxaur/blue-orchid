@@ -87,7 +87,8 @@ New user-facing behaviour, a scheduled job or a chat platform each has a skill i
 
 - `pnpm check` is the gate. Work is done when it passes. The pre-commit hook and CI (`mise run check`) run it,
   and the Claude Code Stop hook runs it whenever the worktree is dirty, so a red gate keeps you working.
-- Every rule in `docs/rules.md` has a check. A new rule comes with its check, or it is not a rule.
+- A rule is a check whose failure message says what to do instead. Put what an agent needs to know in that
+  message, not in a doc.
 - Test the real implementation instead of copying its logic into the test or mocking it. For ports, use the
   fakes in `packages/core/src/testing`; they are the only stand-ins, and only tests may import them.
 - A job is done when a test runs it twice and the second run changes nothing.

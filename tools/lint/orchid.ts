@@ -138,22 +138,25 @@ const noAny = defineRule({
 
 const preferEffectFn = defineRule({
   create(context) {
+    const checkFunction = (node: ESTree.Function | ESTree.ArrowFunctionExpression) => {
+      const body = node.body;
+      // `() => Effect.gen(...)` or `() => { ...; return Effect.gen(...); }`
+      const last = body?.type === "BlockStatement" ? body.body.at(-1) : undefined;
+      const returned =
+        body?.type === "BlockStatement" ? (last?.type === "ReturnStatement" ? last.argument : undefined) : body;
+      if (returned?.type !== "CallExpression" || memberPath(returned.callee) !== "Effect.gen") {
+        return;
+      }
+      context.report({
+        node,
+        message:
+          'Don\'t wrap Effect.gen in a function. Use Effect.fn, which adds a trace span and keeps one style: `const name = Effect.fn("Area.name")(function* (arg) { ... })`. Callbacks take it too: `it.effect("does x", Effect.fn(function* () { ... }))`, `HttpRouter.use(Effect.fn("Area.addRoutes")(function* (router) { ... }))`.',
+      });
+    };
     return {
-      ArrowFunctionExpression(node) {
-        // Inline callbacks like it.effect("...", () => Effect.gen(...)) are fine.
-        if (node.parent.type === "CallExpression" || node.params.length === 0) {
-          return;
-        }
-        const body = node.body;
-        if (body.type !== "CallExpression" || memberPath(body.callee) !== "Effect.gen") {
-          return;
-        }
-        context.report({
-          node,
-          message:
-            'Write functions that return an Effect with Effect.fn: `const name = Effect.fn("Area.name")(function* (arg) { ... })`. It adds a trace span and keeps one style.',
-        });
-      },
+      FunctionDeclaration: checkFunction,
+      FunctionExpression: checkFunction,
+      ArrowFunctionExpression: checkFunction,
     };
   },
 });

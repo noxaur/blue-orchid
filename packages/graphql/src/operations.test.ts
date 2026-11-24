@@ -14,8 +14,9 @@ describe("operations", () => {
     });
   }
 
-  it.effect("Schedule's result schema decodes what the server answers", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "Schedule's result schema decodes what the server answers",
+    Effect.fn(function* () {
       const memory = yield* makeInMemory({ shows: [frieren], releases: [release()] });
       const contextValue: GraphQLContext = {
         run: (effect) => Effect.runPromise(effect.pipe(Effect.provide(memory.layer))),
@@ -38,8 +39,9 @@ describe("operations", () => {
     }),
   );
 
-  it.effect("Show's result schema decodes a show found by another site's id, with its releases", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "Show's result schema decodes a show found by another site's id, with its releases",
+    Effect.fn(function* () {
       const memory = yield* makeInMemory({
         shows: [frieren],
         releases: [
@@ -69,8 +71,9 @@ describe("operations", () => {
     }),
   );
 
-  it.effect("rejects a window longer than 31 days with a client error", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "rejects a window longer than 31 days with a client error",
+    Effect.fn(function* () {
       const memory = yield* makeInMemory({});
       const answer = yield* Effect.promise(() =>
         Promise.resolve(

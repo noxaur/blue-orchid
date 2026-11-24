@@ -5,8 +5,9 @@ import { DateTime, Effect, Schema } from "effect";
 import { release } from "../testing/fixtures.ts";
 
 describe("ChangeJson", () => {
-  it.effect("survives a trip through stored text", () =>
-    Effect.gen(function* () {
+  it.effect(
+    "survives a trip through stored text",
+    Effect.fn(function* () {
       const change = {
         _tag: "EpisodeRescheduled" as const,
         release: release(),
