@@ -35,7 +35,7 @@ const packages = {
     workspace: ["core", "domain"],
     npm: ["effect", "discord-api-types"],
     node: false,
-    hint: "chat-discord adapts core's commands and Messenger port to Discord. Platform-neutral logic belongs in core. See .claude/skills/adding-a-chat-platform/SKILL.md.",
+    hint: "chat-discord adapts core's commands and Messenger port to Discord. Platform-neutral logic belongs in core.",
   },
   "source-anilist": {
     dir: "packages/source-anilist",
