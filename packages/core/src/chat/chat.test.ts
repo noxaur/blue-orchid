@@ -55,6 +55,20 @@ describe("commands", () => {
   );
 
   it.effect(
+    "asks which one when two shows share the exact title",
+    Effect.fn(function* () {
+      const twin = showWith({ id: ShowId.make("anilist:9"), siteIds: [ShowId.make("anilist:9")] });
+      const memory = yield* makeInMemory({ shows: [frieren, twin] });
+      const answer = yield* commands.follow.invoke({ show: frieren.title }, caller).pipe(Effect.provide(memory.layer));
+      expect(answer).toMatchObject({ _tag: "Choose", shows: [frieren, twin] });
+      yield* actions.follow.invoke([frieren.id], caller).pipe(Effect.provide(memory.layer));
+      yield* actions.follow.invoke([twin.id], caller).pipe(Effect.provide(memory.layer));
+      const off = yield* commands.unfollow.invoke({ show: frieren.title }, caller).pipe(Effect.provide(memory.layer));
+      expect(off).toMatchObject({ _tag: "Choose", action: "unfollow" });
+    }),
+  );
+
+  it.effect(
     "lists only followed shows by default, and every show with shows: all",
     Effect.fn(function* () {
       const mine = release({ airsAt: soon });

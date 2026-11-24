@@ -9,31 +9,31 @@ import { Subscriptions } from "../ports/Subscriptions.ts";
 export const choiceLimit = 25;
 
 /**
- * The one show a title means: an exact title match, or the only show that contains it. Otherwise every
- * candidate, best match first, for the person to choose from.
+ * Narrows shows that contain a title to the one it means: the only show with exactly that title, or the only
+ * show at all. Otherwise all of them stay, for the person to choose from.
  */
+export const narrowByTitle = (shows: ReadonlyArray<Show>, title: string): ReadonlyArray<Show> => {
+  const exact = shows.filter((show) => show.title.toLowerCase() === title.toLowerCase());
+  return exact.length === 1 ? exact : shows;
+};
+
 export const matchShow = Effect.fn("Follows.matchShow")(function* (title: string) {
   const catalog = yield* Catalog;
   const shows = yield* catalog.searchShows(title, choiceLimit);
   if (shows.length === 0) {
     return yield* new ShowNotFound({ query: title });
   }
-  const exact = shows.find((show) => show.title.toLowerCase() === title.toLowerCase());
-  const [only] = shows;
-  return exact !== undefined ? [exact] : shows.length === 1 && only !== undefined ? [only] : shows;
+  return narrowByTitle(shows, title);
 });
 
-const withNext = Effect.fn("Follows.withNext")(function* (show: Show) {
-  const catalog = yield* Catalog;
-  return { show, next: yield* catalog.nextRelease(show.id, yield* DateTime.now) };
-});
-
+/** Reads everything before saving, so a failed read never leaves a follow the reply says didn't happen. */
 export const follow = Effect.fn("Follows.follow")(function* (identity: ChatIdentity, id: ShowId) {
   const catalog = yield* Catalog;
   const subscriptions = yield* Subscriptions;
   const show = yield* catalog.show(id);
+  const next = yield* catalog.nextRelease(show.id, yield* DateTime.now);
   yield* subscriptions.follow(identity, show.id);
-  return yield* withNext(show);
+  return { show, next };
 });
 
 export const unfollow = Effect.fn("Follows.unfollow")(function* (identity: ChatIdentity, id: ShowId) {
@@ -44,9 +44,18 @@ export const unfollow = Effect.fn("Follows.unfollow")(function* (identity: ChatI
   return { show, wasFollowing };
 });
 
-/** The shows the identity follows, each with its next release. */
 export const followed = Effect.fn("Follows.followed")(function* (identity: ChatIdentity) {
   const subscriptions = yield* Subscriptions;
-  const shows = yield* subscriptions.followed(identity);
-  return yield* Effect.forEach(shows, withNext);
+  return yield* subscriptions.followed(identity);
+});
+
+/** The shows the identity follows, each with its next release, in two store calls however many there are. */
+export const followedWithNext = Effect.fn("Follows.followedWithNext")(function* (identity: ChatIdentity) {
+  const catalog = yield* Catalog;
+  const shows = yield* followed(identity);
+  const next = yield* catalog.nextReleases(
+    shows.map((show) => show.id),
+    yield* DateTime.now,
+  );
+  return shows.map((show) => ({ show, next: next.get(show.id) }));
 });

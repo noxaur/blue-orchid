@@ -5,7 +5,6 @@ import {
   clip,
   container,
   covers,
-  escape,
   fitLines,
   more,
   notice,
@@ -14,6 +13,7 @@ import {
   showMenu,
   stamp,
   text,
+  title,
 } from "./blocks.ts";
 
 /** C5: the shows you follow, their next episodes, and a menu to unfollow some. */
@@ -27,8 +27,8 @@ export const followingView = ({ shows }: Extract<Reply, { _tag: "Following" }>) 
       .slice(0, 25)
       .map(({ show, next }) =>
         next === undefined
-          ? `**${escape(show.title)}**\n-# Nothing scheduled`
-          : `**${escape(show.title)}**\n-# Next: ${releaseLabel(next)} · ${stamp(next.airsAt, "f")}`,
+          ? `**${title(show)}**\n-# Nothing scheduled`
+          : `**${title(show)}**\n-# Next: ${releaseLabel(next)} · ${stamp(next.airsAt, "f")}`,
       ),
   );
   const listed = shows.slice(0, list.count);

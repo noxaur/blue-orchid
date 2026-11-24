@@ -1,7 +1,7 @@
 import type { ChatIdentity, ShowId } from "@blue-orchid/domain";
 import { Effect } from "effect";
 
-import { follow, followed, unfollow } from "../follows/follows.ts";
+import { follow, followedWithNext, unfollow } from "../follows/follows.ts";
 import type { CommandServices } from "./command.ts";
 import type { Reply } from "./Reply.ts";
 import { trouble } from "./Reply.ts";
@@ -14,7 +14,10 @@ export interface ChatAction {
   readonly invoke: (shows: ReadonlyArray<ShowId>, caller: ChatIdentity) => Effect.Effect<Reply, never, CommandServices>;
 }
 
-/** A show id comes from our own message, so a missing show is as unexpected as a store failure. */
+/**
+ * A show id comes from our own message, so a missing show is as unexpected as a store failure. Unfollowing is
+ * safe to repeat, so after a failure part-way through several, trying the same choice again finishes the job.
+ */
 const answer = <E>(effect: Effect.Effect<Reply, E, CommandServices>) =>
   effect.pipe(Effect.orElseSucceed(() => trouble));
 
@@ -38,7 +41,7 @@ export const actions = {
     invoke: (shows, caller) =>
       answer(
         Effect.forEach(shows, (show) => unfollow(caller, show), { discard: true }).pipe(
-          Effect.andThen(followed(caller)),
+          Effect.andThen(followedWithNext(caller)),
           Effect.map((rest): Reply => ({ _tag: "Following", shows: rest })),
         ),
       ),

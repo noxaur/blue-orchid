@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from "node:fs";
 
 import type { Messengers } from "@blue-orchid/core";
 import { Catalog, deliverNotifications, ScheduleSources, Subscriptions, syncSchedule } from "@blue-orchid/core";
-import { frieren, makeInMemory, release } from "@blue-orchid/core/testing";
+import { frieren, makeInMemory, release, show as showWith } from "@blue-orchid/core/testing";
 import { ChatIdentity, releaseKey, Show, ShowId, Update, UpdateId } from "@blue-orchid/domain";
 import { describe, expect, it } from "@effect/vitest";
 import { DateTime, Effect, Layer } from "effect";
@@ -164,6 +164,34 @@ describe("store on D1", () => {
       }).pipe(Effect.provide(store));
       expect(stored.releases).toHaveLength(300);
       expect(stored.last.id).toBe("anilist:999");
+    }),
+  );
+
+  it.effect(
+    "finds each show's next release in one call, leaving out shows with none",
+    Effect.fn(function* () {
+      const store = yield* localStore;
+      const other = showWith({ id: ShowId.make("anilist:2"), siteIds: [ShowId.make("anilist:2")], title: "Other" });
+      const quiet = showWith({ id: ShowId.make("anilist:3"), siteIds: [ShowId.make("anilist:3")], title: "Quiet" });
+      const rows = [
+        release({ episode: 1, airsAt: at("2026-01-01T15:00:00Z") }),
+        release({ episode: 3, airsAt: at("2026-01-16T15:00:00Z") }),
+        release({ episode: 2, airsAt: at("2026-01-09T15:00:00Z") }),
+        release({ showId: other.id, episode: 5, airsAt: at("2026-01-10T15:00:00Z") }),
+      ];
+      const next = yield* Catalog.use((catalog) =>
+        catalog
+          .save({
+            shows: [frieren, other, quiet],
+            releases: rows.map((row) => ({ release: row, revision: 0 })),
+            updates: [],
+          })
+          .pipe(Effect.andThen(catalog.nextReleases([frieren.id, other.id, quiet.id], at("2026-01-05T00:00:00Z")))),
+      ).pipe(Effect.provide(store));
+      expect([...next].map(([id, row]) => [id, row.episode])).toEqual([
+        [frieren.id, 2],
+        [other.id, 5],
+      ]);
     }),
   );
 });

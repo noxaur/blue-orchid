@@ -3,7 +3,6 @@ import type { Reply } from "@blue-orchid/core";
 import {
   accent,
   container,
-  escape,
   fitLines,
   more,
   notice,
@@ -11,6 +10,7 @@ import {
   separator,
   stamp,
   text,
+  title,
   when,
   withCover,
 } from "./blocks.ts";
@@ -36,16 +36,14 @@ export const scheduleView = ({ scope, releases }: Extract<Reply, { _tag: "Schedu
       separator(),
       ...shown.flatMap(({ show, release }, index) => [
         ...(index === 0 ? [] : [separator(false)]),
-        withCover(show, `### ${escape(show.title)}\n-# ${releaseLabel(release)}\n${when(release.airsAt)}`),
+        withCover(show, `### ${title(show)}\n-# ${releaseLabel(release)}\n${when(release.airsAt)}`),
       ]),
       ...more(releases.length - shown.length),
     ]);
   }
   /** The whole catalog leaves room only for one compact line per release. */
   const list = fitLines(
-    releases.map(
-      ({ show, release }) => `${stamp(release.airsAt, "f")} **${escape(show.title)}** · ${releaseLabel(release)}`,
-    ),
+    releases.map(({ show, release }) => `${stamp(release.airsAt, "f")} **${title(show)}** · ${releaseLabel(release)}`),
   );
   return container(accent.reply, [
     text("## Next seven days\n-# All shows"),

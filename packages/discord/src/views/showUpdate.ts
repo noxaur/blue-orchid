@@ -4,12 +4,12 @@ import {
   accent,
   button,
   container,
-  escape,
   releaseLabel,
   row,
   separator,
   stamp,
   text,
+  title,
   when,
   withCover,
 } from "./blocks.ts";
@@ -21,7 +21,7 @@ export const showUpdateView = ({ show, update }: Extract<Reply, { _tag: "ShowUpd
   return container(moved ? accent.moved : accent.scheduled, [
     withCover(
       show,
-      `-# ${moved ? "Episode moved" : "New episode"}\n## ${escape(show.title)}\n-# ${releaseLabel(change.release)}`,
+      `-# ${moved ? "Episode moved" : "New episode"}\n## ${title(show)}\n-# ${releaseLabel(change.release)}`,
     ),
     text(
       moved ? `~~${stamp(change.previousAirsAt, "F")}~~\n${when(change.release.airsAt)}` : when(change.release.airsAt),

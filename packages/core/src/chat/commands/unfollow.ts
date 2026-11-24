@@ -1,6 +1,6 @@
 import { Effect } from "effect";
 
-import { followed, unfollow as unfollowShow } from "../../follows/follows.ts";
+import { followed, narrowByTitle, unfollow as unfollowShow } from "../../follows/follows.ts";
 import { defineCommand } from "../command.ts";
 import type { Reply } from "../Reply.ts";
 import { trouble } from "../Reply.ts";
@@ -11,14 +11,13 @@ export const unfollow = defineCommand({
   options: { show: { description: "Title of the show" } },
   run: (option, caller) =>
     Effect.gen(function* () {
-      const query = option("show").toLowerCase();
-      const shows = (yield* followed(caller))
-        .map(({ show }) => show)
-        .filter((show) => show.title.toLowerCase().includes(query));
-      const [only] = shows;
-      const exact = shows.find((show) => show.title.toLowerCase() === query);
-      const show = exact ?? (shows.length === 1 ? only : undefined);
-      if (show !== undefined) {
+      const query = option("show");
+      const shows = narrowByTitle(
+        (yield* followed(caller)).filter((show) => show.title.toLowerCase().includes(query.toLowerCase())),
+        query,
+      );
+      const [show] = shows;
+      if (shows.length === 1 && show !== undefined) {
         return { _tag: "Unfollowed", ...(yield* unfollowShow(caller, show.id)) } satisfies Reply;
       }
       return shows.length === 0

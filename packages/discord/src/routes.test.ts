@@ -106,6 +106,45 @@ describe("DiscordRoutes", () => {
     }).pipe(Effect.scoped),
   );
 
+  it.effect("only points to DMs when a command comes from a server, and changes nothing", () =>
+    Effect.gen(function* () {
+      const { send } = yield* setup;
+      const answer = yield* send({
+        type: InteractionType.ApplicationCommand,
+        context: InteractionContextType.Guild,
+        member: { user: { id: "77" } },
+        data: { name: "follow", options: [{ name: "show", type: 3, value: "frieren" }] },
+      });
+      expect(answer.json).toEqual({
+        type: InteractionResponseType.ChannelMessageWithSource,
+        data: {
+          content: "blue-orchid works in DMs. Open a DM with the bot and try again.",
+          flags: MessageFlags.Ephemeral,
+        },
+      });
+      const list = yield* send({
+        type: InteractionType.ApplicationCommand,
+        context: InteractionContextType.BotDM,
+        user: { id: "77" },
+        data: { name: "following" },
+      });
+      expect(JSON.stringify(list.json)).toContain("You don't follow any shows yet");
+    }).pipe(Effect.scoped),
+  );
+
+  it.effect("answers a failed press with a new message, so the controls stay for another try", () =>
+    Effect.gen(function* () {
+      const { send } = yield* setup;
+      const answer = yield* send({
+        type: InteractionType.MessageComponent,
+        user: { id: "77" },
+        data: { custom_id: "follow:anilist:1", component_type: 2 },
+      });
+      expect(answer.json).toMatchObject({ type: InteractionResponseType.ChannelMessageWithSource });
+      expect(JSON.stringify(answer.json)).toContain("Something went wrong on our side");
+    }).pipe(Effect.scoped),
+  );
+
   it.effect("unfollows the shows picked in the following menu", () =>
     Effect.gen(function* () {
       const { send } = yield* setup;

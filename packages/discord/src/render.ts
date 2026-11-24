@@ -23,8 +23,7 @@ const views: Views = {
   Following: followingView,
   ShowUpdate: showUpdateView,
   MissingOption: ({ names }) => notice(accent.neutral, `Missing ${names.join(", ")}`, "Fill it in and try again."),
-  Trouble: () =>
-    notice(accent.error, "Something went wrong on our side", "Nothing was changed. Try again in a minute."),
+  Trouble: () => notice(accent.error, "Something went wrong on our side", "Try again in a minute."),
 };
 
 /** A reply as the components of a Components V2 message. */

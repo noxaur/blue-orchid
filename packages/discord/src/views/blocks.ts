@@ -27,8 +27,23 @@ export const accent = {
 
 export const escape = (text: string) => text.replace(/[\\*_~`|>#\-[\]()<]/g, (char) => `\\${char}`);
 
-/** Plain text fields such as select labels allow 100 characters and no markdown. */
-export const clip = (text: string, max = 100) => (text.length <= max ? text : `${text.slice(0, max - 1)}…`);
+/** Plain text fields such as select labels allow 100 characters and no markdown. Cuts between code points, so an emoji is never split. */
+export const clip = (text: string, max = 100) => {
+  if (text.length <= max) {
+    return text;
+  }
+  let kept = "";
+  for (const char of text) {
+    if (kept.length + char.length > max - 1) {
+      break;
+    }
+    kept += char;
+  }
+  return `${kept}…`;
+};
+
+/** A show's title for markdown. Clipped, so even the longest titles leave every view inside 4,000 characters. */
+export const title = (show: Show) => escape(clip(show.title, 150));
 
 /** `<t:…>` renders in each reader's own timezone and language. */
 export const stamp = (at: DateTime.Utc, style: "f" | "F" | "R") =>

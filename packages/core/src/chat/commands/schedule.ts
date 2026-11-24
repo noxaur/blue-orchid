@@ -23,7 +23,7 @@ export const schedule = defineCommand({
       if (option("shows") === "all") {
         return { _tag: "Schedule", scope: "all", releases } as const;
       }
-      const mine = new Set((yield* followed(caller)).map(({ show }) => show.id));
+      const mine = new Set((yield* followed(caller)).map((show) => show.id));
       return {
         _tag: "Schedule",
         scope: "following",

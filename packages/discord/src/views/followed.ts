@@ -5,12 +5,12 @@ import {
   aniListLink,
   button,
   container,
-  escape,
   releaseLabel,
   row,
   separator,
   showFacts,
   text,
+  title,
   when,
   withCover,
 } from "./blocks.ts";
@@ -18,7 +18,7 @@ import {
 /** C2: you now follow a show. */
 export const followedView = ({ show, next }: Extract<Reply, { _tag: "Followed" }>) =>
   container(accent.reply, [
-    withCover(show, `-# Now following\n## ${escape(show.title)}\n-# ${showFacts(show)}`),
+    withCover(show, `-# Now following\n## ${title(show)}\n-# ${showFacts(show)}`),
     separator(),
     text(
       next === undefined

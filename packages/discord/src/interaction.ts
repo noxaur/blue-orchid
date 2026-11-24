@@ -1,7 +1,7 @@
 import type { CommandServices, Reply } from "@blue-orchid/core";
 import { actions, commands, isActionName, isCommandName } from "@blue-orchid/core";
 import { ChatIdentity, ShowId } from "@blue-orchid/domain";
-import { InteractionResponseType, InteractionType, MessageFlags } from "discord-api-types/v10";
+import { InteractionContextType, InteractionResponseType, InteractionType, MessageFlags } from "discord-api-types/v10";
 import type {
   APIContainerComponent,
   APIInteractionResponse,
@@ -24,6 +24,8 @@ const Interaction = Schema.Struct({
       values: Schema.optionalKey(Schema.Array(Schema.String)),
     }),
   ),
+  /** Where the interaction happened. Older payloads leave it out; `member` is only set in servers. */
+  context: Schema.optionalKey(Schema.Enum(InteractionContextType)),
   user: Schema.optionalKey(Schema.Struct({ id: Schema.String })),
   member: Schema.optionalKey(Schema.Struct({ user: Schema.Struct({ id: Schema.String }) })),
 });
@@ -43,11 +45,23 @@ const reply = (answer: Reply): APIInteractionResponse => ({
   data: message(renderReply(answer)),
 });
 
-/** A button or menu press replaces the message it was on, so the message always shows where you stand. */
-const update = (answer: Reply): APIInteractionResponse => ({
-  type: InteractionResponseType.UpdateMessage,
-  data: message(renderReply(answer)),
-});
+/**
+ * A button or menu press replaces the message it was on, so the message always shows where you stand. A failure
+ * comes as a new message instead, so the controls stay for another try.
+ */
+const update = (answer: Reply): APIInteractionResponse =>
+  answer._tag === "Trouble"
+    ? reply(answer)
+    : { type: InteractionResponseType.UpdateMessage, data: message(renderReply(answer)) };
+
+/**
+ * Commands are registered for the bot's DMs only, but Discord keeps showing older registrations for up to an
+ * hour. Elsewhere a reply could show someone's follows to a whole server, so the bot only points to its DMs.
+ */
+const onlyInDms: APIInteractionResponse = {
+  type: InteractionResponseType.ChannelMessageWithSource,
+  data: { content: "blue-orchid works in DMs. Open a DM with the bot and try again.", flags: MessageFlags.Ephemeral },
+};
 
 const say = (heading: string): APIInteractionResponse => ({
   type: InteractionResponseType.ChannelMessageWithSource,
@@ -73,6 +87,12 @@ export const respond = Effect.fn("Discord.respond")(function* (
   const userId = interaction.user?.id ?? interaction.member?.user.id;
   if (userId === undefined) {
     return say("This bot only answers people");
+  }
+  if (
+    interaction.member !== undefined ||
+    (interaction.context ?? InteractionContextType.BotDM) !== InteractionContextType.BotDM
+  ) {
+    return onlyInDms;
   }
   const caller = new ChatIdentity({ platform: "discord", userId });
   const data = interaction.data;

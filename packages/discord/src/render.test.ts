@@ -31,10 +31,8 @@ const longShow = (index: number) =>
   showWith({
     id: ShowId.make(`anilist:${index}`),
     siteIds: [ShowId.make(`anilist:${index}`)],
-    title: `A Very Long Show Title Number ${index} With A Subtitle That Goes On And On Until It Fills A Line`.padEnd(
-      180,
-      "!",
-    ),
+    /** Markdown characters escape to two each, the worst case for the text limit. */
+    title: `A Very Long Show Title Number ${index} `.padEnd(4000, "*_"),
     imageUrl: `https://img.anili.st/media/${index}.jpg`,
   });
 
@@ -77,6 +75,16 @@ describe("renderReply", () => {
     const [container] = renderReply(moved);
     const texts = JSON.stringify(container);
     expect(texts).toContain("~~<t:1767970800:F>~~");
+  });
+
+  it("never splits an emoji when it clips a menu label", () => {
+    const [container] = renderReply({
+      _tag: "Choose",
+      action: "follow",
+      query: "a",
+      shows: [showWith({ title: `${"a".repeat(98)}😀zz` })],
+    });
+    expect(JSON.stringify(container)).toContain(`"label":"${"a".repeat(98)}…"`);
   });
 
   it("puts each show's cover beside it and links to AniList", () => {
