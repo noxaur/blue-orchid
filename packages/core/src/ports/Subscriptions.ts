@@ -20,8 +20,8 @@ export class Subscriptions extends Context.Service<
   Subscriptions,
   {
     readonly follow: (identity: ChatIdentity, show: ShowId) => Effect.Effect<void, StoreFailed>;
-    /** Succeeds with false when the identity did not follow the show. */
-    readonly unfollow: (identity: ChatIdentity, show: ShowId) => Effect.Effect<boolean, StoreFailed>;
+    /** Stops every listed follow in one call, and succeeds with how many the identity had. */
+    readonly unfollow: (identity: ChatIdentity, shows: ReadonlyArray<ShowId>) => Effect.Effect<number, StoreFailed>;
     readonly followed: (identity: ChatIdentity) => Effect.Effect<ReadonlyArray<Show>, StoreFailed>;
     /**
      * Takes up to `limit` deliveries with attempts left that no one has claimed in the last `claimLease`, oldest

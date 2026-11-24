@@ -194,4 +194,33 @@ describe("store on D1", () => {
       ]);
     }),
   );
+
+  it.effect(
+    "stops several follows in one call, and only the caller's",
+    Effect.fn(function* () {
+      const store = yield* localStore;
+      const other = showWith({ id: ShowId.make("anilist:2"), siteIds: [ShowId.make("anilist:2")], title: "Other" });
+      const someoneElse = new ChatIdentity({ platform: "discord", userId: "2002" });
+      const result = yield* Effect.gen(function* () {
+        const catalog = yield* Catalog;
+        const subscriptions = yield* Subscriptions;
+        yield* catalog.save({ shows: [frieren, other], releases: [], updates: [] });
+        yield* subscriptions.follow(reader, frieren.id);
+        yield* subscriptions.follow(reader, other.id);
+        yield* subscriptions.follow(someoneElse, frieren.id);
+        const removed = yield* subscriptions.unfollow(reader, [frieren.id, other.id, ShowId.make("anilist:404")]);
+        const again = yield* subscriptions.unfollow(reader, [frieren.id]);
+        return {
+          removed,
+          again,
+          mine: yield* subscriptions.followed(reader),
+          theirs: yield* subscriptions.followed(someoneElse),
+        };
+      }).pipe(Effect.provide(store));
+      expect(result.removed).toBe(2);
+      expect(result.again).toBe(0);
+      expect(result.mine).toEqual([]);
+      expect(result.theirs.map((followedShow) => followedShow.id)).toEqual([frieren.id]);
+    }),
+  );
 });

@@ -148,10 +148,12 @@ export const makeInMemory = Effect.fn("InMemory.make")(function* (seed: {
           : [...all, { identity, show, since }],
       );
     }),
-    unfollow: (identity, show) =>
+    unfollow: (identity, showIds) =>
       Ref.modify(follows, (all) => {
-        const rest = all.filter((f) => !(identityKey(f.identity) === identityKey(identity) && f.show === show));
-        return [rest.length < all.length, rest];
+        const rest = all.filter(
+          (f) => !(identityKey(f.identity) === identityKey(identity) && showIds.includes(f.show)),
+        );
+        return [all.length - rest.length, rest];
       }),
     followed: Effect.fn("InMemory.followed")(function* (identity) {
       const byId = yield* Ref.get(shows);

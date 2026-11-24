@@ -40,8 +40,18 @@ export const unfollow = Effect.fn("Follows.unfollow")(function* (identity: ChatI
   const catalog = yield* Catalog;
   const subscriptions = yield* Subscriptions;
   const show = yield* catalog.show(id);
-  const wasFollowing = yield* subscriptions.unfollow(identity, show.id);
-  return { show, wasFollowing };
+  const removed = yield* subscriptions.unfollow(identity, [show.id]);
+  return { show, wasFollowing: removed > 0 };
+});
+
+/** Stops several follows in one store call, then lists what is left. */
+export const unfollowMany = Effect.fn("Follows.unfollowMany")(function* (
+  identity: ChatIdentity,
+  ids: ReadonlyArray<ShowId>,
+) {
+  const subscriptions = yield* Subscriptions;
+  yield* subscriptions.unfollow(identity, ids);
+  return yield* followedWithNext(identity);
 });
 
 export const followed = Effect.fn("Follows.followed")(function* (identity: ChatIdentity) {

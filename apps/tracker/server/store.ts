@@ -265,13 +265,15 @@ const makeSubscriptions = (db: Db) =>
           .onConflictDoNothing(),
       );
     }),
-    unfollow: (identity, show) =>
-      query("unfollow", () =>
-        db
-          .delete(follows)
-          .where(and(sameIdentity(identity), eq(follows.showId, show)))
-          .returning({ showId: follows.showId }),
-      ).pipe(Effect.map((rows) => rows.length > 0)),
+    unfollow: (identity, showIds) =>
+      Effect.forEach(chunks(showIds, maxBoundValues - 2), (batch) =>
+        query("unfollow", () =>
+          db
+            .delete(follows)
+            .where(and(sameIdentity(identity), inArray(follows.showId, [...batch])))
+            .returning({ showId: follows.showId }),
+        ),
+      ).pipe(Effect.map((batches) => batches.flat().length)),
     followed: (identity) =>
       query("followed", () =>
         db

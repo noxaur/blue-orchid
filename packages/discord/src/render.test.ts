@@ -77,6 +77,16 @@ describe("renderReply", () => {
     expect(texts).toContain("~~<t:1767970800:F>~~");
   });
 
+  it("tells apart two shows that share a title and details by their site id", () => {
+    const [container] = renderReply({
+      _tag: "Choose",
+      action: "follow",
+      query: "frieren",
+      shows: [showWith({}), showWith({ id: ShowId.make("anilist:9"), siteIds: [ShowId.make("anilist:9")] })],
+    });
+    expect(JSON.stringify(container)).toContain('"description":"TV · Fall 2023 · 28 episodes · 24 min · anilist:9"');
+  });
+
   it("never splits an emoji when it clips a menu label", () => {
     const [container] = renderReply({
       _tag: "Choose",
