@@ -145,8 +145,16 @@ const preferEffectFn = defineRule({
         if (memberPath(node.callee) !== "Effect.gen") {
           return;
         }
-        const parent = node.parent;
-        const isArrowBody = parent.type === "ArrowFunctionExpression" && parent.body === node;
+        // Look through `cond ? Effect.gen(...) : x` and `Effect.gen(...) satisfies T` to what returns it.
+        let value: ESTree.Node = node;
+        while (
+          (value.parent.type === "ConditionalExpression" && value.parent.test !== value) ||
+          value.parent.type === "TSSatisfiesExpression"
+        ) {
+          value = value.parent;
+        }
+        const parent = value.parent;
+        const isArrowBody = parent.type === "ArrowFunctionExpression" && parent.body === value;
         if (!isArrowBody && parent.type !== "ReturnStatement") {
           return;
         }
