@@ -106,7 +106,7 @@ export default defineConfig({
         command: [
           "vp check --deny-warnings",
           "vp run -r typecheck",
-          "depcruise apps packages infra --config .dependency-cruiser.cjs --output-type err-long",
+          "depcruise apps packages infra --config tools/lint/dependency-cruiser.cjs --output-type err-long",
           "knip",
           "sherif",
           "node tools/scripts/docs.ts",

@@ -31,7 +31,7 @@ We can't compromise on these.
 - If a short request has two possible meanings, ask one question before you start.
 - Call a bug fixed only when a test, log or recording shows it.
 - Ask the user before adding a package, an npm dependency or a cloud resource, and before changing a rule in
-  `vite.config.ts`, `.dependency-cruiser.cjs` or `tools/lint/orchid.ts`. A rule that seems wrong is a question,
+  `vite.config.ts`, `tools/lint/dependency-cruiser.cjs` or `tools/lint/orchid.ts`. A rule that seems wrong is a question,
   not an edit.
 
 ## How it works
@@ -39,7 +39,7 @@ We can't compromise on these.
 One Void app on Cloudflare serves the website, the API and the bot, and runs three crons: `import-catalog` refreshes
 shows from the catalog source, `sync-schedule` writes releases and updates into D1, `deliver-notifications` sends
 them. Dependencies point inward: `apps/tracker` →
-adapters (`graphql`, `chat-discord`, `source-anilist`, `web`) → `core` → `domain`. `.dependency-cruiser.cjs` holds what each
+adapters (`graphql`, `chat-discord`, `source-anilist`, `web`) → `core` → `domain`. `tools/lint/dependency-cruiser.cjs` holds what each
 package may import, and `docs/internals/architecture.md` traces a request and a cron run.
 
 | Directory                 | What it is                                                   | Read first                          |

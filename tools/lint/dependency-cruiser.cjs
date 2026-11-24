@@ -115,7 +115,7 @@ module.exports = {
     {
       name: "unknown-package",
       severity: "error",
-      comment: `Not an approved package. Approved: ${allDirs.join(", ")}. Put the code in one of them (see AGENTS.md). A new package needs the user's approval and an entry in .dependency-cruiser.cjs. Never add "shared" or "utils" packages.`,
+      comment: `Not an approved package. Approved: ${allDirs.join(", ")}. Put the code in one of them (see AGENTS.md). A new package needs the user's approval and an entry in tools/lint/dependency-cruiser.cjs. Never add "shared" or "utils" packages.`,
       from: { path: "^(apps|packages)/", pathNot: `^(${allDirs.join("|")})/` },
       to: {},
     },
