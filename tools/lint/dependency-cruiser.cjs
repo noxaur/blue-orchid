@@ -37,12 +37,12 @@ const packages = {
     node: false,
     hint: "discord adapts core's commands and Messenger port to Discord. Platform-neutral logic belongs in core.",
   },
-  "source-anilist": {
-    dir: "packages/source-anilist",
+  "source-wikidata": {
+    dir: "packages/source-wikidata",
     workspace: ["core", "domain"],
     npm: ["effect"],
     node: false,
-    hint: "source-anilist implements core's CatalogSource for AniList. Import logic belongs in core.",
+    hint: "source-wikidata implements core's CatalogSource for Wikidata. Import logic belongs in core.",
   },
   "source-syoboi": {
     dir: "packages/source-syoboi",
@@ -60,7 +60,7 @@ const packages = {
   },
   tracker: {
     dir: "apps/tracker",
-    workspace: ["core", "discord", "domain", "graphql", "source-anilist", "source-syoboi", "web"],
+    workspace: ["core", "discord", "domain", "graphql", "source-syoboi", "source-wikidata", "web"],
     npm: "any",
     node: true,
     hint: "tracker is the Void app: it wires packages together and deploys them. Logic goes in a package.",

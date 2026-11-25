@@ -1,4 +1,4 @@
-import { ChatIdentity, releaseKey, SourceUnavailable } from "@blue-orchid/domain";
+import { ChatIdentity, releaseKey, Show, ShowId, SourceUnavailable } from "@blue-orchid/domain";
 import type { Release } from "@blue-orchid/domain";
 import { describe, expect, it } from "@effect/vitest";
 import { DateTime, Effect, Layer, Ref } from "effect";
@@ -26,6 +26,51 @@ const makeSource = Effect.fn("makeSource")(function* (initial: Release) {
 });
 
 describe("syncSchedule then deliverNotifications", () => {
+  it.effect(
+    "files a source's release under the stored show that has its site id, so that show's followers hear of it",
+    Effect.fn(function* () {
+      yield* TestClock.setTime(DateTime.toEpochMillis(at("2026-01-05T00:00:00Z")));
+      const memory = yield* makeInMemory({ shows: [frieren], releases: [release()] });
+      const alias = ShowId.make("myanimelist:52991");
+      const named = new Show({
+        id: alias,
+        title: "葬送のフリーレン",
+        imageUrl: null,
+        episodes: null,
+        format: null,
+        status: "airing",
+        season: null,
+        year: null,
+        startDate: null,
+        endDate: null,
+        episodeMinutes: null,
+        siteIds: [alias],
+      });
+      const source = ScheduleSources.layer([
+        {
+          name: "fake",
+          fetch: () =>
+            Effect.succeed({
+              shows: [named],
+              releases: [release({ showId: alias, airsAt: at("2026-01-09T16:30:00Z") })],
+            }),
+        },
+      ]);
+      const layer = Layer.merge(memory.layer, source);
+
+      yield* Subscriptions.use((subscriptions) => subscriptions.follow(reader, frieren.id)).pipe(Effect.provide(layer));
+      expect((yield* syncSchedule().pipe(Effect.provide(layer))).updates).toBe(1);
+      expect((yield* syncSchedule().pipe(Effect.provide(layer))).updates).toBe(0);
+      yield* deliverNotifications().pipe(Effect.provide(layer));
+
+      const sent = yield* memory.sent;
+      expect(sent).toHaveLength(1);
+      expect(sent[0]?.reply).toMatchObject({ _tag: "ShowUpdate", update: { change: { _tag: "EpisodeRescheduled" } } });
+      const stored = yield* Catalog.use((catalog) => catalog.show(alias)).pipe(Effect.provide(layer));
+      expect(stored).toEqual(frieren);
+    }),
+  );
+
   it.effect(
     "tells a follower once when an episode moves",
     Effect.fn(function* () {

@@ -7,7 +7,7 @@ export interface SourceSnapshot {
   readonly releases: ReadonlyArray<Release>;
 }
 
-/** One place schedule data comes from, such as AniList. Implement it in its own package and add it to the list. */
+/** One place schedule data comes from, such as Syoboi Calendar. Implement it in its own package and add it to the list. */
 export interface ScheduleSource {
   readonly name: string;
   readonly fetch: (from: DateTime.Utc, to: DateTime.Utc) => Effect.Effect<SourceSnapshot, SourceUnavailable>;

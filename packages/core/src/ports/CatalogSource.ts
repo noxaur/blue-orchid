@@ -5,9 +5,10 @@ import { Context } from "effect";
 export type CatalogSlice =
   | { readonly _tag: "Airing" }
   | { readonly _tag: "Upcoming" }
-  | { readonly _tag: "Year"; readonly year: number };
+  | { readonly _tag: "Year"; readonly year: number }
+  | { readonly _tag: "Undated" };
 
-/** Where the catalog's shows come from, such as AniList. */
+/** Where the catalog's shows come from, such as Wikidata. */
 export class CatalogSource extends Context.Service<
   CatalogSource,
   {

@@ -15,6 +15,8 @@ export interface StoredRelease {
 
 export interface CatalogChanges {
   readonly shows: ReadonlyArray<Show>;
+  /** Shows a schedule source names: stored only when the catalog lacks them, so they never overwrite its details. */
+  readonly showsIfMissing?: ReadonlyArray<Show>;
   /** Only releases that are new or moved, each with its new revision. */
   readonly releases: ReadonlyArray<StoredRelease>;
   readonly updates: ReadonlyArray<Update>;
@@ -40,6 +42,8 @@ export class Catalog extends Context.Service<
     /** Shows whose title contains the text, best match first. */
     readonly searchShows: (title: string, limit: number) => Effect.Effect<ReadonlyArray<Show>, StoreFailed>;
     readonly releasesByKey: (keys: ReadonlyArray<string>) => Effect.Effect<ReadonlyArray<StoredRelease>, StoreFailed>;
+    /** For each given site id that a stored show already has, that show's id. */
+    readonly ownersOf: (siteIds: ReadonlyArray<ShowId>) => Effect.Effect<ReadonlyMap<ShowId, ShowId>, StoreFailed>;
     /**
      * Writes everything or nothing. A release must never be saved without its update: a retry would then see no
      * change and the update would be lost. A release is only replaced by the next revision, and never over a

@@ -1,7 +1,7 @@
 import { DiscordConfig, DiscordRoutes, makeDiscordMessenger } from "@blue-orchid/discord";
 import { Messengers, ScheduleSources } from "@blue-orchid/core";
-import { AniListCatalogLive } from "@blue-orchid/source-anilist";
 import { makeSyoboiSchedule } from "@blue-orchid/source-syoboi";
+import { WikidataCatalogLive } from "@blue-orchid/source-wikidata";
 import { Effect, Layer, Option, Redacted } from "effect";
 import { FetchHttpClient, HttpRouter, HttpServerResponse } from "effect/http";
 import { env } from "void/env";
@@ -38,7 +38,7 @@ const SourcesLive = Layer.effect(
 );
 
 /** Every service the app's use cases need. Routes, crons and GraphQL all run on this. */
-export const AppLive = Layer.mergeAll(StoreLive, SourcesLive, AniListCatalogLive, MessengersLive).pipe(
+export const AppLive = Layer.mergeAll(StoreLive, SourcesLive, WikidataCatalogLive, MessengersLive).pipe(
   Layer.provideMerge(DiscordConfigLive),
   Layer.provide(FetchHttpClient.layer),
 );

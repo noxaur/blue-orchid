@@ -1,7 +1,8 @@
-import type { Release, Show } from "@blue-orchid/domain";
-import { releaseKey, Update, UpdateId } from "@blue-orchid/domain";
+import type { Show } from "@blue-orchid/domain";
+import { Release, releaseKey, Update, UpdateId } from "@blue-orchid/domain";
 import { DateTime, Effect, Result } from "effect";
 
+import { keepStoredIds } from "../catalog/storedIds.ts";
 import { Catalog } from "../ports/Catalog.ts";
 import { ScheduleSources } from "../ports/ScheduleSources.ts";
 import { diffReleases } from "./diff.ts";
@@ -31,12 +32,25 @@ export const syncSchedule = Effect.fn("Schedule.sync")(function* () {
   const failed = results.filter(Result.isFailure).map((result) => result.failure);
   yield* Effect.forEach(failed, (error) => Effect.logWarning("Schedule source failed", error));
 
-  const shows: ReadonlyArray<Show> = firstBy(
-    snapshots.flatMap((snapshot) => snapshot.shows),
-    (show) => show.id,
+  const { shows, idOf } = yield* keepStoredIds(
+    firstBy(
+      snapshots.flatMap((snapshot) => snapshot.shows),
+      (show: Show) => show.id,
+    ),
   );
   const releases: ReadonlyArray<Release> = firstBy(
-    snapshots.flatMap((snapshot) => snapshot.releases),
+    snapshots.flatMap((snapshot) =>
+      snapshot.releases.map(
+        (release) =>
+          new Release({
+            showId: idOf(release.showId),
+            episode: release.episode,
+            kind: release.kind,
+            region: release.region,
+            airsAt: release.airsAt,
+          }),
+      ),
+    ),
     releaseKey,
   );
   const stored = yield* catalog.releasesByKey(releases.map(releaseKey));
@@ -54,7 +68,8 @@ export const syncSchedule = Effect.fn("Schedule.sync")(function* () {
     };
   });
   yield* catalog.save({
-    shows,
+    shows: [],
+    showsIfMissing: shows,
     releases: changed.map((row) => row.release),
     updates: changed.map((row) => row.update),
   });

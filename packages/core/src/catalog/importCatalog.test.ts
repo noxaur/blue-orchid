@@ -1,4 +1,4 @@
-import { SourceUnavailable } from "@blue-orchid/domain";
+import { Show, ShowId, SourceUnavailable } from "@blue-orchid/domain";
 import { describe, expect, it } from "@effect/vitest";
 import { DateTime, Effect, Layer } from "effect";
 import { TestClock } from "effect/testing";
@@ -26,13 +26,13 @@ describe("sliceFor", () => {
     expect(Math.abs(years[0]! - years[1]!)).toBe(1);
   });
 
-  it("covers every year from 1917 to next year", () => {
+  it("covers every year from 1917 to next year, and the shows with no start date", () => {
     const start = DateTime.toEpochMillis(at("2026-11-23T01:00:00Z"));
-    const years = new Set(
-      Array.from({ length: 111 }, (_, index) => sliceFor(DateTime.makeUnsafe(start + index * 2 * 3_600_000))).flatMap(
-        (slice) => (slice._tag === "Year" ? [slice.year] : []),
-      ),
+    const slices = Array.from({ length: 112 }, (_, index) =>
+      sliceFor(DateTime.makeUnsafe(start + index * 2 * 3_600_000)),
     );
+    const years = new Set(slices.flatMap((slice) => (slice._tag === "Year" ? [slice.year] : [])));
+    expect(slices.filter((slice) => slice._tag === "Undated")).toHaveLength(1);
     expect(years.size).toBe(111);
     expect([Math.min(...years), Math.max(...years)]).toEqual([1917, 2027]);
   });
@@ -69,6 +69,39 @@ describe("importCatalog", () => {
       expect((yield* importCatalog().pipe(Effect.provide(layer))).shows).toBe(0);
       const show = yield* Catalog.use((catalog) => catalog.show(frieren.id)).pipe(Effect.provide(layer));
       expect(show).toEqual(frieren);
+    }),
+  );
+  it.effect(
+    "keeps a stored show's id when the source now names it by another site first",
+    Effect.fn(function* () {
+      yield* TestClock.setTime(DateTime.toEpochMillis(at("2026-11-23T00:00:00Z")));
+      const memory = yield* makeInMemory({ shows: [frieren] });
+      const syoboi = ShowId.make("syoboi:6680");
+      const renamed = new Show({
+        id: syoboi,
+        title: frieren.title,
+        imageUrl: null,
+        episodes: 28,
+        format: "tv",
+        status: "finished",
+        season: "fall",
+        year: 2023,
+        startDate: "2023-09-29",
+        endDate: "2024-03-22",
+        episodeMinutes: null,
+        siteIds: [syoboi, ...frieren.siteIds],
+      });
+      const layer = Layer.merge(
+        memory.layer,
+        fakeCatalogSource(() => Effect.succeed([renamed])),
+      );
+      yield* importCatalog().pipe(Effect.provide(layer));
+      const found = yield* Catalog.use((catalog) =>
+        Effect.all([catalog.show(syoboi), catalog.searchShows("", 100)]),
+      ).pipe(Effect.provide(layer));
+
+      expect(found[0].id).toBe(frieren.id);
+      expect(found[1]).toHaveLength(1);
     }),
   );
 });

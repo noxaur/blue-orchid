@@ -138,12 +138,12 @@ importers:
       '@blue-orchid/graphql':
         specifier: workspace:*
         version: link:../../packages/graphql
-      '@blue-orchid/source-anilist':
-        specifier: workspace:*
-        version: link:../../packages/source-anilist
       '@blue-orchid/source-syoboi':
         specifier: workspace:*
         version: link:../../packages/source-syoboi
+      '@blue-orchid/source-wikidata':
+        specifier: workspace:*
+        version: link:../../packages/source-wikidata
       '@blue-orchid/web':
         specifier: workspace:*
         version: link:../../packages/web
@@ -322,7 +322,7 @@ importers:
         specifier: 'catalog:'
         version: 5.1.0(@types/node@24.19.2)(@vitest/browser-preview@5.1.0)(@vitest/ui@5.1.0)(@voidzero-dev/vite-plus-core@1.5.0(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.9.1))
 
-  packages/source-anilist:
+  packages/source-syoboi:
     dependencies:
       '@blue-orchid/core':
         specifier: workspace:*
@@ -350,7 +350,7 @@ importers:
         specifier: 'catalog:'
         version: 5.1.0(@types/node@24.19.2)(@vitest/browser-preview@5.1.0)(@vitest/ui@5.1.0)(@voidzero-dev/vite-plus-core@1.5.0(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.9.1))
 
-  packages/source-syoboi:
+  packages/source-wikidata:
     dependencies:
       '@blue-orchid/core':
         specifier: workspace:*

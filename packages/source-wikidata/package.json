@@ -1,5 +1,5 @@
 {
-  "name": "@blue-orchid/source-anilist",
+  "name": "@blue-orchid/source-wikidata",
   "private": true,
   "type": "module",
   "exports": {

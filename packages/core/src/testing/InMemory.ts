@@ -1,5 +1,5 @@
-import type { ChatIdentity, Release, Show, ShowId, Update } from "@blue-orchid/domain";
-import { MessageNotSent, releaseKey, ShowNotFound } from "@blue-orchid/domain";
+import type { ChatIdentity, Release, ShowId, Update } from "@blue-orchid/domain";
+import { MessageNotSent, releaseKey, Show, ShowNotFound } from "@blue-orchid/domain";
 import { DateTime, Effect, Layer, Ref } from "effect";
 
 import type { Reply } from "../chat/Reply.ts";
@@ -115,8 +115,47 @@ export const makeInMemory = Effect.fn("InMemory.make")(function* (seed: {
         ),
       ),
     releasesByKey: (keys) => Ref.get(releases).pipe(Effect.map((all) => keys.flatMap((key) => all.get(key) ?? []))),
+    ownersOf: (siteIds) =>
+      Ref.get(shows).pipe(
+        Effect.map((byId) => {
+          const wanted = new Set(siteIds);
+          return new Map(
+            [...byId.values()].flatMap((show) =>
+              show.siteIds.filter((siteId) => wanted.has(siteId)).map((siteId) => [siteId, show.id] as const),
+            ),
+          );
+        }),
+      ),
     save: Effect.fn("InMemory.save")(function* (changes) {
-      yield* Ref.update(shows, (byId) => new Map([...byId, ...changes.shows.map((show) => [show.id, show] as const)]));
+      yield* Ref.update(shows, (byId) => {
+        const next = new Map([...byId, ...changes.shows.map((show) => [show.id, show] as const)]);
+        for (const show of changes.showsIfMissing ?? []) {
+          const stored = next.get(show.id);
+          // Like the database: a known show keeps its details and gains only the site ids nobody has yet.
+          const owned = new Set([...next.values()].flatMap((each) => each.siteIds));
+          const added = show.siteIds.filter((siteId) => !owned.has(siteId));
+          next.set(
+            show.id,
+            stored === undefined
+              ? show
+              : new Show({
+                  id: stored.id,
+                  title: stored.title,
+                  imageUrl: stored.imageUrl,
+                  episodes: stored.episodes,
+                  format: stored.format,
+                  status: stored.status,
+                  season: stored.season,
+                  year: stored.year,
+                  startDate: stored.startDate,
+                  endDate: stored.endDate,
+                  episodeMinutes: stored.episodeMinutes,
+                  siteIds: [...stored.siteIds, ...added],
+                }),
+          );
+        }
+        return next;
+      });
       const runAt = changes.updates[0]?.detectedAt;
       const known = yield* Ref.get(updates);
       // Like the database: only the next revision, and never over a revision a later run stored.
