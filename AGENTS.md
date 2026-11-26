@@ -37,9 +37,9 @@ We can't compromise on these.
 ## How it works
 
 One Void app on Cloudflare serves the website, the API and the bot, and runs three crons: `import-catalog` refreshes
-shows from the catalog source, `sync-schedule` writes releases and updates into D1, `deliver-notifications` sends
+shows from the catalog source and fills gaps from details sources, `sync-schedule` writes releases and updates into D1, `deliver-notifications` sends
 them. Dependencies point inward: `apps/tracker` →
-adapters (`graphql`, `discord`, `source-wikidata`, `source-syoboi`, `web`) → `core` → `domain`. `tools/lint/dependency-cruiser.cjs` holds what each
+adapters (`graphql`, `discord`, `source-wikidata`, `source-syoboi`, `source-thetvdb`, `web`) → `core` → `domain`. `tools/lint/dependency-cruiser.cjs` holds what each
 package may import, and `docs/internals/architecture.md` traces a request and a cron run.
 
 | Directory                  | What it is                                                   | Read first                           |
@@ -50,6 +50,7 @@ package may import, and `docs/internals/architecture.md` traces a request and a 
 | `packages/discord`         | Discord slash commands and DMs                               | `packages/discord/AGENTS.md`         |
 | `packages/source-wikidata` | Wikidata as the catalog source                               | `packages/source-wikidata/AGENTS.md` |
 | `packages/source-syoboi`   | Syoboi Calendar as a schedule source                         | `packages/source-syoboi/AGENTS.md`   |
+| `packages/source-thetvdb`  | TheTVDB as a details source                                  | `packages/source-thetvdb/AGENTS.md`  |
 | `packages/web`             | The website (React, TanStack Router)                         | `packages/web/AGENTS.md`             |
 | `apps/tracker`             | The Void app: wiring, database, routes, crons, auth, deploys | `apps/tracker/AGENTS.md`             |
 | `infra`                    | The Alchemy stack, for cloud resources Void does not own     | `docs/internals/hosting.md`          |

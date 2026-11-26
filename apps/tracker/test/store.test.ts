@@ -204,6 +204,19 @@ describe("store on D1", () => {
   );
 
   it.effect(
+    "reads stored shows by id in one call, leaving out unknown ids",
+    Effect.fn(function* () {
+      const store = yield* localStore;
+      const found = yield* Effect.gen(function* () {
+        const catalog = yield* Catalog;
+        yield* catalog.save({ shows: [frieren], releases: [], updates: [] });
+        return yield* catalog.shows([frieren.id, ShowId.make("syoboi:1")]);
+      }).pipe(Effect.provide(store));
+      expect([...found]).toEqual([[frieren.id, frieren]]);
+    }),
+  );
+
+  it.effect(
     "names the stored show that owns each known site id",
     Effect.fn(function* () {
       const store = yield* localStore;

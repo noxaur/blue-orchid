@@ -7,10 +7,11 @@ import type { Catalog } from "./ports/Catalog.ts";
 import type { CatalogSource } from "./ports/CatalogSource.ts";
 import type { Messengers } from "./ports/Messengers.ts";
 import type { ScheduleSources } from "./ports/ScheduleSources.ts";
+import type { ShowDetailsSources } from "./ports/ShowDetails.ts";
 import type { Subscriptions } from "./ports/Subscriptions.ts";
 import { syncSchedule } from "./schedule/sync.ts";
 
-export type JobServices = Catalog | CatalogSource | Subscriptions | ScheduleSources | Messengers;
+export type JobServices = Catalog | CatalogSource | ShowDetailsSources | Subscriptions | ScheduleSources | Messengers;
 
 /** A job must be safe to run twice or to overlap with itself: cron runs can repeat and can be late. */
 export interface Job {
@@ -28,7 +29,7 @@ export const jobs = {
     run: syncSchedule(),
   },
   "import-catalog": {
-    description: "Refresh one slice of the catalog's shows from the catalog source",
+    description: "Refresh one slice of the catalog's shows from the catalog source, and fill gaps from details sources",
     run: importCatalog(),
   },
   "deliver-notifications": {

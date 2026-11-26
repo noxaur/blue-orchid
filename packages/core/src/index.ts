@@ -10,6 +10,7 @@ export { Catalog, type CatalogChanges, type ScheduledRelease, type StoredRelease
 export { CatalogSource, type CatalogSlice } from "./ports/CatalogSource.ts";
 export { Messengers, type Messenger } from "./ports/Messengers.ts";
 export { ScheduleSources, type ScheduleSource, type SourceSnapshot } from "./ports/ScheduleSources.ts";
+export { ShowDetailsSources, type Details, type ShowDetailsSource } from "./ports/ShowDetails.ts";
 export { claimLease, maxAttempts, Subscriptions, type PendingDelivery } from "./ports/Subscriptions.ts";
 export { diffReleases } from "./schedule/diff.ts";
 export { nextRelease, nextSevenDays, releasesBetween } from "./schedule/schedule.ts";

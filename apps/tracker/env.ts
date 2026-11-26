@@ -10,4 +10,6 @@ export default defineEnv({
   DISCORD_BOT_TOKEN: string().optional(),
   AUTH_DISCORD_CLIENT_ID: string().optional(),
   AUTH_DISCORD_CLIENT_SECRET: string().optional(),
+  /** TheTVDB API key. Without it, import-catalog skips TheTVDB. */
+  TVDB_API_KEY: string().optional(),
 });

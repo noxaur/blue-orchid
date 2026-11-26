@@ -1,6 +1,7 @@
 import { DiscordConfig, DiscordRoutes, makeDiscordMessenger } from "@blue-orchid/discord";
-import { Messengers, ScheduleSources } from "@blue-orchid/core";
+import { Messengers, ScheduleSources, ShowDetailsSources } from "@blue-orchid/core";
 import { makeSyoboiSchedule } from "@blue-orchid/source-syoboi";
+import { makeTheTvdbDetails } from "@blue-orchid/source-thetvdb";
 import { WikidataCatalogLive } from "@blue-orchid/source-wikidata";
 import { Effect, Layer, Option, Redacted } from "effect";
 import { FetchHttpClient, HttpRouter, HttpServerResponse } from "effect/http";
@@ -37,8 +38,16 @@ const SourcesLive = Layer.effect(
   }),
 );
 
+/** Details sources for gaps the catalog source leaves. TheTVDB only runs with an API key. */
+const DetailsLive = Layer.effect(
+  ShowDetailsSources,
+  Effect.gen(function* () {
+    return env.TVDB_API_KEY === undefined ? [] : [yield* makeTheTvdbDetails(Redacted.make(env.TVDB_API_KEY))];
+  }),
+);
+
 /** Every service the app's use cases need. Routes, crons and GraphQL all run on this. */
-export const AppLive = Layer.mergeAll(StoreLive, SourcesLive, WikidataCatalogLive, MessengersLive).pipe(
+export const AppLive = Layer.mergeAll(StoreLive, SourcesLive, WikidataCatalogLive, DetailsLive, MessengersLive).pipe(
   Layer.provideMerge(DiscordConfigLive),
   Layer.provide(FetchHttpClient.layer),
 );

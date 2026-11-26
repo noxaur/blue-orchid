@@ -100,6 +100,18 @@ const makeCatalog = (db: Db) =>
       }
       return yield* toShow(row);
     }),
+    shows: (ids) =>
+      Effect.forEach(chunks(ids, maxBoundValues), (batch) =>
+        query("shows", () =>
+          db
+            .select({ show: shows, siteIds: siteIdsOfShow })
+            .from(shows)
+            .where(inArray(shows.id, [...batch])),
+        ),
+      ).pipe(
+        Effect.flatMap((batches) => Effect.forEach(batches.flat(), toShow)),
+        Effect.map((found) => new Map(found.map((show) => [show.id, show] as const))),
+      ),
     showReleases: (id) =>
       query("showReleases", () =>
         db.select().from(releases).where(eq(releases.showId, id)).orderBy(asc(releases.airsAt)).limit(1000),

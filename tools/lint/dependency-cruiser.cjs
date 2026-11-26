@@ -51,6 +51,13 @@ const packages = {
     node: false,
     hint: "source-syoboi implements core's ScheduleSource for Syoboi Calendar. Sync logic belongs in core.",
   },
+  "source-thetvdb": {
+    dir: "packages/source-thetvdb",
+    workspace: ["core", "domain"],
+    npm: ["effect"],
+    node: false,
+    hint: "source-thetvdb implements core's ShowDetailsSource for TheTVDB. Import logic belongs in core.",
+  },
   web: {
     dir: "packages/web",
     workspace: ["domain", "graphql"],
@@ -60,7 +67,7 @@ const packages = {
   },
   tracker: {
     dir: "apps/tracker",
-    workspace: ["core", "discord", "domain", "graphql", "source-syoboi", "source-wikidata", "web"],
+    workspace: ["core", "discord", "domain", "graphql", "source-syoboi", "source-thetvdb", "source-wikidata", "web"],
     npm: "any",
     node: true,
     hint: "tracker is the Void app: it wires packages together and deploys them. Logic goes in a package.",

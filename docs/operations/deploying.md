@@ -12,6 +12,9 @@ Production values are set once per secret and never come from `.env`. The app re
 pnpm --filter @blue-orchid/tracker exec void secret put DISCORD_BOT_TOKEN
 ```
 
+`TVDB_API_KEY` turns on TheTVDB in `import-catalog`. Get a key at https://thetvdb.com/api-information (free under
+$50k revenue a year, with the credit link the site's footer already shows).
+
 ## Deploy by hand
 
 Only the first deploy, or one that CI cannot make, is run by hand. It acts on the live account and its D1 data:

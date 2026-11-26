@@ -32,6 +32,8 @@ export class Catalog extends Context.Service<
       to: DateTime.Utc,
     ) => Effect.Effect<ReadonlyArray<ScheduledRelease>, StoreFailed>;
     readonly show: (id: ShowId) => Effect.Effect<Show, ShowNotFound | StoreFailed>;
+    /** The stored shows with these ids, in one round trip. Ids with no show are left out. */
+    readonly shows: (ids: ReadonlyArray<ShowId>) => Effect.Effect<ReadonlyMap<ShowId, Show>, StoreFailed>;
     readonly showReleases: (id: ShowId) => Effect.Effect<ReadonlyArray<Release>, StoreFailed>;
     readonly nextRelease: (id: ShowId, from: DateTime.Utc) => Effect.Effect<Release | undefined, StoreFailed>;
     /** Each show's earliest release at or after `from`, in one round trip. Shows with none are left out. */

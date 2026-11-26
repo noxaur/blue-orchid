@@ -71,6 +71,18 @@ export const makeInMemory = Effect.fn("InMemory.make")(function* (seed: {
           return show === undefined ? Effect.fail(new ShowNotFound({ query: id })) : Effect.succeed(show);
         }),
       ),
+    shows: (ids) =>
+      Ref.get(shows).pipe(
+        Effect.map(
+          (byId) =>
+            new Map(
+              ids.flatMap((id) => {
+                const show = byId.get(id);
+                return show === undefined ? [] : [[id, show] as const];
+              }),
+            ),
+        ),
+      ),
     showReleases: (id) =>
       Ref.get(releases).pipe(
         Effect.map((all) =>

@@ -30,6 +30,7 @@ const sites = [
   ["kitsu", "P11495"],
   ["livechart", "P12489"],
   ["animenewsnetwork", "P1985"],
+  ["thetvdb", "P4835"],
 ] as const;
 
 const literal = (time: DateTime.Utc) => `"${DateTime.formatIso(time)}"`;

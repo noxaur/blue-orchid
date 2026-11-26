@@ -1,11 +1,13 @@
 import { Show, ShowId, SourceUnavailable } from "@blue-orchid/domain";
+import type { ShowDetailsSource } from "../ports/ShowDetails.ts";
 import { describe, expect, it } from "@effect/vitest";
 import { DateTime, Effect, Layer } from "effect";
 import { TestClock } from "effect/testing";
 
 import { Catalog } from "../ports/Catalog.ts";
+import { ShowDetailsSources } from "../ports/ShowDetails.ts";
 import { fakeCatalogSource } from "../testing/catalogSource.ts";
-import { frieren } from "../testing/fixtures.ts";
+import { frieren, show as showWith } from "../testing/fixtures.ts";
 import { makeInMemory } from "../testing/InMemory.ts";
 import { importCatalog, sliceFor } from "./importCatalog.ts";
 
@@ -44,8 +46,9 @@ describe("importCatalog", () => {
     Effect.fn(function* () {
       yield* TestClock.setTime(DateTime.toEpochMillis(at("2026-11-23T00:00:00Z")));
       const memory = yield* makeInMemory({});
-      const layer = Layer.merge(
+      const layer = Layer.mergeAll(
         memory.layer,
+        ShowDetailsSources.layer([]),
         fakeCatalogSource(() => Effect.succeed([frieren])),
       );
       const read = Catalog.use((catalog) => catalog.searchShows("", 100)).pipe(Effect.provide(layer));
@@ -62,8 +65,9 @@ describe("importCatalog", () => {
     "keeps the catalog as it was when the source fails",
     Effect.fn(function* () {
       const memory = yield* makeInMemory({ shows: [frieren] });
-      const layer = Layer.merge(
+      const layer = Layer.mergeAll(
         memory.layer,
+        ShowDetailsSources.layer([]),
         fakeCatalogSource(() => Effect.fail(new SourceUnavailable({ source: "fake", cause: "down" }))),
       );
       expect((yield* importCatalog().pipe(Effect.provide(layer))).shows).toBe(0);
@@ -91,8 +95,9 @@ describe("importCatalog", () => {
         episodeMinutes: null,
         siteIds: [syoboi, ...frieren.siteIds],
       });
-      const layer = Layer.merge(
+      const layer = Layer.mergeAll(
         memory.layer,
+        ShowDetailsSources.layer([]),
         fakeCatalogSource(() => Effect.succeed([renamed])),
       );
       yield* importCatalog().pipe(Effect.provide(layer));
@@ -102,6 +107,51 @@ describe("importCatalog", () => {
 
       expect(found[0].id).toBe(frieren.id);
       expect(found[1]).toHaveLength(1);
+    }),
+  );
+
+  it.effect(
+    "fills a missing runtime from a details source once, and keeps it when the catalog source still lacks it",
+    Effect.fn(function* () {
+      yield* TestClock.setTime(DateTime.toEpochMillis(at("2026-11-23T00:00:00Z")));
+      const memory = yield* makeInMemory({});
+      const tvdb = ShowId.make("thetvdb:424536");
+      const blank = showWith({ episodeMinutes: null, siteIds: [frieren.id, tvdb] });
+      const asked: Array<string> = [];
+      const details: ShowDetailsSource = {
+        site: "thetvdb",
+        fetch: (id) => Effect.sync(() => (asked.push(id), { episodeMinutes: 24 })),
+      };
+      const layer = Layer.mergeAll(
+        memory.layer,
+        ShowDetailsSources.layer([details]),
+        fakeCatalogSource(() => Effect.succeed([blank])),
+      );
+      const read = Catalog.use((catalog) => catalog.show(frieren.id)).pipe(Effect.provide(layer));
+
+      yield* importCatalog().pipe(Effect.provide(layer));
+      expect((yield* read).episodeMinutes).toBe(24);
+      yield* importCatalog().pipe(Effect.provide(layer));
+      expect((yield* read).episodeMinutes).toBe(24);
+      expect(asked).toEqual(["424536"]);
+    }),
+  );
+
+  it.effect(
+    "stores the show without the detail when the details source fails",
+    Effect.fn(function* () {
+      const memory = yield* makeInMemory({});
+      const blank = showWith({ episodeMinutes: null, siteIds: [frieren.id, ShowId.make("thetvdb:1")] });
+      const layer = Layer.mergeAll(
+        memory.layer,
+        ShowDetailsSources.layer([
+          { site: "thetvdb", fetch: () => Effect.fail(new SourceUnavailable({ source: "thetvdb", cause: "down" })) },
+        ]),
+        fakeCatalogSource(() => Effect.succeed([blank])),
+      );
+      yield* importCatalog().pipe(Effect.provide(layer));
+      const stored = yield* Catalog.use((catalog) => catalog.show(frieren.id)).pipe(Effect.provide(layer));
+      expect(stored.episodeMinutes).toBeNull();
     }),
   );
 });
