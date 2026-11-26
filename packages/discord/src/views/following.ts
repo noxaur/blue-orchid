@@ -3,7 +3,7 @@ import type { Reply } from "@blue-orchid/core";
 import {
   accent,
   clip,
-  container,
+  catalogContainer,
   covers,
   fitLines,
   more,
@@ -32,7 +32,7 @@ export const followingView = ({ shows }: Extract<Reply, { _tag: "Following" }>) 
       ),
   );
   const listed = shows.slice(0, list.count);
-  return container(accent.reply, [
+  return catalogContainer(accent.reply, [
     text(`## Following · ${shows.length}`),
     ...covers(listed.map(({ show }) => show)),
     text(list.text),

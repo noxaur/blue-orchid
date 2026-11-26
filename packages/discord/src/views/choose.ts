@@ -1,7 +1,7 @@
 import type { Reply } from "@blue-orchid/core";
 import type { Show } from "@blue-orchid/domain";
 
-import { accent, clip, container, escape, row, showFacts, showMenu, text } from "./blocks.ts";
+import { accent, clip, catalogContainer, escape, row, showFacts, showMenu, text } from "./blocks.ts";
 
 /** "TV · Fall 2023", plus the site id when another option would read the same. */
 const details = (show: Show, shows: ReadonlyArray<Show>) => {
@@ -12,7 +12,7 @@ const details = (show: Show, shows: ReadonlyArray<Show>) => {
 
 /** C3: the title matched several shows, so the person picks one. */
 export const chooseView = ({ action, query, shows }: Extract<Reply, { _tag: "Choose" }>) =>
-  container(accent.reply, [
+  catalogContainer(accent.reply, [
     text(`### Which one?\n-# Shows matching “${escape(clip(query, 200))}”`),
     row(
       showMenu(
