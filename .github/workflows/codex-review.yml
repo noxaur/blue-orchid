@@ -1,0 +1,82 @@
+name: codex-review
+
+# The project rule: Codex reviews a branch for bugs before anyone opens a pull request for it. Each push to a
+# branch other than main runs it. To review a branch that does not hold this file yet, dispatch it from main
+# and name the branch.
+on:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to review
+        required: true
+
+permissions:
+  contents: read
+
+# Each run costs OpenAI usage, so a newer push replaces the review of the commit before it.
+concurrency:
+  group: codex-review-${{ inputs.branch || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    env:
+      MODEL: gpt-6.2-sol
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.branch || github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - id: diff
+        run: |
+          base=$(git merge-base origin/main HEAD)
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          if git diff --quiet "$base" HEAD; then
+            echo "codex-review: skipped, the branch has no changes from main." >> "$GITHUB_STEP_SUMMARY"
+            echo "empty=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.diff.outputs.empty != 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          BASE: ${{ steps.diff.outputs.base }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::The OPENAI_API_KEY secret is not set. Add it under Settings, Secrets and variables, Actions, then run this workflow again."
+            exit 1
+          fi
+          npm install --global @openai/codex@0.172.0
+          printenv OPENAI_API_KEY | codex login --with-api-key
+          codex exec --model "$MODEL" --sandbox read-only --ephemeral \
+            --output-schema .github/codex/review-schema.json --output-last-message review.json \
+            "Review the changes in \`git diff $BASE...HEAD\` for bugs, as a reviewer before a pull request is opened.
+          Follow the repository's AGENTS.md files. Report only real bugs the change adds or makes worse: wrong
+          behaviour, crashes, races, lost or duplicate updates, security holes and broken project rules. Skip style.
+          Give each finding the file and the line in the new version, a priority from P0 (blocks everything) to P3
+          (minor), and a body that names the inputs or state that make it fail. Return an empty list when you find
+          no bugs."
+      - if: steps.diff.outputs.empty != 'true'
+        run: |
+          count=$(jq '.findings | length' review.json)
+          {
+            echo "## Codex review ($MODEL): $count finding(s)"
+            echo
+            jq -r '.summary' review.json
+            echo
+            jq -r '.findings[] | "### \(.priority) \(.title)\n`\(.file):\(.line)`\n\n\(.body)\n"' review.json
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+          # Annotations reach the check run, so an agent can read the findings through the API.
+          jq -r 'def data: gsub("%"; "%25") | gsub("\r"; "%0D") | gsub("\n"; "%0A");
+            def prop: data | gsub(":"; "%3A") | gsub(","; "%2C");
+            .findings[] | "::error file=\(.file | prop),line=\(.line),title=\("\(.priority) \(.title)" | prop)::\(.body | data)"' review.json
+          [ "$count" -eq 0 ]
+      - if: always() && steps.diff.outputs.empty != 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: codex-review
+          path: review.json
+          if-no-files-found: ignore
