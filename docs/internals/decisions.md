@@ -17,3 +17,8 @@ cannot come from core. Core's `jobs` table holds what each job does, and a test 
 
 **Dependencies must be 14 days old.** `minimumReleaseAge` in `pnpm-workspace.yaml` gives a hijacked release time
 to be caught before it reaches us.
+
+**TheTVDB is the only data source.** It replaced Wikidata (catalog) and Syoboi Calendar (schedule) so one source
+names every show and episode. Its free key needs a visible credit with a link on every surface, does not cover
+artwork, and forbids passing data on, so shows have no images and the API stays private. It gives an air date per
+episode and one air time per series, so times are less exact than Syoboi's broadcast listings.

@@ -11,8 +11,8 @@
 - **Kind**: `raw` (the Japanese broadcast), `sub` (subtitled stream) or `dub` (dubbed stream).
 - **Region**: the country a release time and its streaming links apply to. Norway first.
 - **Catalog**: our stored shows and releases. Every surface reads from it.
-- **Schedule source**: an outside system we pull releases from, such as Syoboi Calendar.
-- **Catalog source**: an outside system we pull every show's details from, such as Wikidata.
+- **Schedule source**: an outside system we pull releases from, such as TheTVDB.
+- **Catalog source**: an outside system we pull every show's details from, such as TheTVDB.
 - **Catalog slice**: the part of the catalog one import run refreshes: airing shows, upcoming shows, the shows
   that started in one year, or the shows with no start date.
 - **Update**: a change to the schedule that the sync job saw: an episode scheduled or rescheduled.
