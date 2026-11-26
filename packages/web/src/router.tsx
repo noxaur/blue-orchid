@@ -46,6 +46,18 @@ const rootRoute = createRootRouteWithContext<RouterContext>()({
           )}
         </header>
         <Outlet />
+        {/* TheTVDB's licence asks for this credit, with a link, wherever its data is shown. */}
+        <footer className="mt-12 text-xs text-zinc-500">
+          Metadata provided by{" "}
+          <a className="underline" href="https://thetvdb.com/">
+            TheTVDB
+          </a>
+          . Please consider adding missing information or{" "}
+          <a className="underline" href="https://thetvdb.com/subscribe">
+            subscribing
+          </a>
+          .
+        </footer>
       </div>
     );
   },

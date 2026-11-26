@@ -39,20 +39,19 @@ We can't compromise on these.
 One Void app on Cloudflare serves the website, the API and the bot, and runs three crons: `import-catalog` refreshes
 shows from the catalog source, `sync-schedule` writes releases and updates into D1, `deliver-notifications` sends
 them. Dependencies point inward: `apps/tracker` →
-adapters (`graphql`, `discord`, `source-wikidata`, `source-syoboi`, `web`) → `core` → `domain`. `tools/lint/dependency-cruiser.cjs` holds what each
+adapters (`graphql`, `discord`, `source-thetvdb`, `web`) → `core` → `domain`. `tools/lint/dependency-cruiser.cjs` holds what each
 package may import, and `docs/internals/architecture.md` traces a request and a cron run.
 
-| Directory                  | What it is                                                   | Read first                           |
-| -------------------------- | ------------------------------------------------------------ | ------------------------------------ |
-| `packages/domain`          | Schemas, branded ids, tagged errors                          | `packages/domain/AGENTS.md`          |
-| `packages/core`            | Use cases, ports, chat commands, jobs, in-memory fakes       | `packages/core/AGENTS.md`            |
-| `packages/graphql`         | The API (Pothos, Yoga) and the website's operations          | `packages/graphql/AGENTS.md`         |
-| `packages/discord`         | Discord slash commands and DMs                               | `packages/discord/AGENTS.md`         |
-| `packages/source-wikidata` | Wikidata as the catalog source                               | `packages/source-wikidata/AGENTS.md` |
-| `packages/source-syoboi`   | Syoboi Calendar as a schedule source                         | `packages/source-syoboi/AGENTS.md`   |
-| `packages/web`             | The website (React, TanStack Router)                         | `packages/web/AGENTS.md`             |
-| `apps/tracker`             | The Void app: wiring, database, routes, crons, auth, deploys | `apps/tracker/AGENTS.md`             |
-| `infra`                    | The Alchemy stack, for cloud resources Void does not own     | `docs/internals/hosting.md`          |
+| Directory                 | What it is                                                   | Read first                          |
+| ------------------------- | ------------------------------------------------------------ | ----------------------------------- |
+| `packages/domain`         | Schemas, branded ids, tagged errors                          | `packages/domain/AGENTS.md`         |
+| `packages/core`           | Use cases, ports, chat commands, jobs, in-memory fakes       | `packages/core/AGENTS.md`           |
+| `packages/graphql`        | The API (Pothos, Yoga) and the website's operations          | `packages/graphql/AGENTS.md`        |
+| `packages/discord`        | Discord slash commands and DMs                               | `packages/discord/AGENTS.md`        |
+| `packages/source-thetvdb` | TheTVDB as the catalog and schedule source                   | `packages/source-thetvdb/AGENTS.md` |
+| `packages/web`            | The website (React, TanStack Router)                         | `packages/web/AGENTS.md`            |
+| `apps/tracker`            | The Void app: wiring, database, routes, crons, auth, deploys | `apps/tracker/AGENTS.md`            |
+| `infra`                   | The Alchemy stack, for cloud resources Void does not own     | `docs/internals/hosting.md`         |
 
 Code is Effect v4 throughout: `Effect.fn` for functions, `Context.Service` for services, `Schema.TaggedError` for
 errors, `yield* DateTime.now` for time. Effects run only in the composition roots that the root `vite.config.ts`

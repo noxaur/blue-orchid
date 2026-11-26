@@ -3,7 +3,7 @@ import type { Reply } from "@blue-orchid/core";
 import {
   accent,
   button,
-  container,
+  catalogContainer,
   releaseLabel,
   row,
   separator,
@@ -18,7 +18,7 @@ import {
 export const showUpdateView = ({ show, update }: Extract<Reply, { _tag: "ShowUpdate" }>) => {
   const { change } = update;
   const moved = change._tag === "EpisodeRescheduled";
-  return container(moved ? accent.moved : accent.scheduled, [
+  return catalogContainer(moved ? accent.moved : accent.scheduled, [
     withCover(
       show,
       `-# ${moved ? "Episode moved" : "New episode"}\n## ${title(show)}\n-# ${releaseLabel(change.release)}`,

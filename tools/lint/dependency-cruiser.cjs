@@ -37,19 +37,12 @@ const packages = {
     node: false,
     hint: "discord adapts core's commands and Messenger port to Discord. Platform-neutral logic belongs in core.",
   },
-  "source-wikidata": {
-    dir: "packages/source-wikidata",
+  "source-thetvdb": {
+    dir: "packages/source-thetvdb",
     workspace: ["core", "domain"],
     npm: ["effect"],
     node: false,
-    hint: "source-wikidata implements core's CatalogSource for Wikidata. Import logic belongs in core.",
-  },
-  "source-syoboi": {
-    dir: "packages/source-syoboi",
-    workspace: ["core", "domain"],
-    npm: ["effect"],
-    node: false,
-    hint: "source-syoboi implements core's ScheduleSource for Syoboi Calendar. Sync logic belongs in core.",
+    hint: "source-thetvdb implements core's CatalogSource and ScheduleSource for TheTVDB. Import and sync logic belong in core.",
   },
   web: {
     dir: "packages/web",
@@ -60,7 +53,7 @@ const packages = {
   },
   tracker: {
     dir: "apps/tracker",
-    workspace: ["core", "discord", "domain", "graphql", "source-syoboi", "source-wikidata", "web"],
+    workspace: ["core", "discord", "domain", "graphql", "source-thetvdb", "web"],
     npm: "any",
     node: true,
     hint: "tracker is the Void app: it wires packages together and deploys them. Logic goes in a package.",

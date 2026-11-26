@@ -106,4 +106,11 @@ describe("renderReply", () => {
     expect(JSON.stringify(container)).toContain('"custom_id":"unfollow:anilist:7"');
     expect(JSON.stringify(container)).toContain("https://anilist.co/anime/7");
   });
+
+  it("credits TheTVDB under every reply that shows catalog data, and not under errors", () => {
+    const credit = "Metadata provided by [TheTVDB](https://thetvdb.com/)";
+    expect(JSON.stringify(renderReply(moved))).toContain(credit);
+    expect(JSON.stringify(renderReply({ _tag: "Followed", show: longShow(7), next: undefined }))).toContain(credit);
+    expect(JSON.stringify(renderReply({ _tag: "Trouble" }))).not.toContain(credit);
+  });
 });

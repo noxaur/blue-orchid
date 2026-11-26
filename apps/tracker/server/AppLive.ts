@@ -1,7 +1,7 @@
 import { DiscordConfig, DiscordRoutes, makeDiscordMessenger } from "@blue-orchid/discord";
-import { Messengers, ScheduleSources } from "@blue-orchid/core";
-import { makeSyoboiSchedule } from "@blue-orchid/source-syoboi";
-import { WikidataCatalogLive } from "@blue-orchid/source-wikidata";
+import { CatalogSource, Messengers, ScheduleSources } from "@blue-orchid/core";
+import { SourceUnavailable } from "@blue-orchid/domain";
+import { makeTheTvdbCatalog, makeTheTvdbSchedule } from "@blue-orchid/source-thetvdb";
 import { Effect, Layer, Option, Redacted } from "effect";
 import { FetchHttpClient, HttpRouter, HttpServerResponse } from "effect/http";
 import { env } from "void/env";
@@ -29,16 +29,31 @@ const MessengersLive = Layer.effect(
   }),
 );
 
+const theTvdbKey = Option.fromUndefinedOr(env.THETVDB_API_KEY).pipe(Option.map(Redacted.make));
+
 /** Schedule sources, most trusted first. See packages/core/src/ports/ScheduleSources.ts. */
 const SourcesLive = Layer.effect(
   ScheduleSources,
   Effect.gen(function* () {
-    return [yield* makeSyoboiSchedule()];
+    return Option.isSome(theTvdbKey) ? [yield* makeTheTvdbSchedule(theTvdbKey.value)] : [];
   }),
 );
 
+/** Without THETVDB_API_KEY the catalog import fails each run and logs why, and the site keeps the shows it has. */
+const CatalogSourceLive = Layer.effect(
+  CatalogSource,
+  Option.isSome(theTvdbKey)
+    ? makeTheTvdbCatalog(theTvdbKey.value)
+    : Effect.succeed(
+        CatalogSource.of({
+          name: "thetvdb",
+          fetch: () => Effect.fail(new SourceUnavailable({ source: "thetvdb", cause: "THETVDB_API_KEY is missing." })),
+        }),
+      ),
+);
+
 /** Every service the app's use cases need. Routes, crons and GraphQL all run on this. */
-export const AppLive = Layer.mergeAll(StoreLive, SourcesLive, WikidataCatalogLive, MessengersLive).pipe(
+export const AppLive = Layer.mergeAll(StoreLive, SourcesLive, CatalogSourceLive, MessengersLive).pipe(
   Layer.provideMerge(DiscordConfigLive),
   Layer.provide(FetchHttpClient.layer),
 );

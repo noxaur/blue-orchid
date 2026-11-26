@@ -172,10 +172,18 @@ export const row = (
   components: [...controls],
 });
 
-export const container = (
+const container = (color: number, components: ReadonlyArray<APIComponentInContainer>): APIContainerComponent => ({
+  type: ComponentType.Container,
+  accent_color: color,
+  components: [...components],
+});
+
+/** A container for a reply that shows catalog data, ending in the credit TheTVDB's licence asks for. */
+export const catalogContainer = (
   color: number,
   components: ReadonlyArray<APIComponentInContainer>,
-): APIContainerComponent => ({ type: ComponentType.Container, accent_color: color, components: [...components] });
+): APIContainerComponent =>
+  container(color, [...components, text("-# Metadata provided by [TheTVDB](https://thetvdb.com/)")]);
 
 /** A short message: a heading and a grey line under it. */
 export const notice = (color: number, heading: string, detail: string) =>

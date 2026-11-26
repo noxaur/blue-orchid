@@ -4,7 +4,7 @@ import {
   accent,
   aniListLink,
   button,
-  container,
+  catalogContainer,
   releaseLabel,
   row,
   separator,
@@ -17,7 +17,7 @@ import {
 
 /** C2: you now follow a show. */
 export const followedView = ({ show, next }: Extract<Reply, { _tag: "Followed" }>) =>
-  container(accent.reply, [
+  catalogContainer(accent.reply, [
     withCover(show, `-# Now following\n## ${title(show)}\n-# ${showFacts(show)}`),
     separator(),
     text(

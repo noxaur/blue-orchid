@@ -2,7 +2,7 @@ import type { Reply } from "@blue-orchid/core";
 
 import {
   accent,
-  container,
+  catalogContainer,
   fitLines,
   more,
   notice,
@@ -31,7 +31,7 @@ export const scheduleView = ({ scope, releases }: Extract<Reply, { _tag: "Schedu
   }
   if (scope === "following") {
     const shown = releases.slice(0, maxWithCovers);
-    return container(accent.reply, [
+    return catalogContainer(accent.reply, [
       text("## Next seven days"),
       separator(),
       ...shown.flatMap(({ show, release }, index) => [
@@ -45,7 +45,7 @@ export const scheduleView = ({ scope, releases }: Extract<Reply, { _tag: "Schedu
   const list = fitLines(
     releases.map(({ show, release }) => `${stamp(release.airsAt, "f")} **${title(show)}** · ${releaseLabel(release)}`),
   );
-  return container(accent.reply, [
+  return catalogContainer(accent.reply, [
     text("## Next seven days\n-# All shows"),
     separator(),
     text(list.text),

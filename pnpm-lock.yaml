@@ -138,12 +138,9 @@ importers:
       '@blue-orchid/graphql':
         specifier: workspace:*
         version: link:../../packages/graphql
-      '@blue-orchid/source-syoboi':
+      '@blue-orchid/source-thetvdb':
         specifier: workspace:*
-        version: link:../../packages/source-syoboi
-      '@blue-orchid/source-wikidata':
-        specifier: workspace:*
-        version: link:../../packages/source-wikidata
+        version: link:../../packages/source-thetvdb
       '@blue-orchid/web':
         specifier: workspace:*
         version: link:../../packages/web
@@ -322,35 +319,7 @@ importers:
         specifier: 'catalog:'
         version: 5.1.0(@types/node@24.19.2)(@vitest/browser-preview@5.1.0)(@vitest/ui@5.1.0)(@voidzero-dev/vite-plus-core@1.5.0(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.9.1))
 
-  packages/source-syoboi:
-    dependencies:
-      '@blue-orchid/core':
-        specifier: workspace:*
-        version: link:../core
-      '@blue-orchid/domain':
-        specifier: workspace:*
-        version: link:../domain
-      effect:
-        specifier: 'catalog:'
-        version: 4.1.2
-    devDependencies:
-      '@effect/language-service':
-        specifier: 'catalog:'
-        version: 0.87.5
-      '@effect/vitest':
-        specifier: 'catalog:'
-        version: 4.1.2(effect@4.1.2)(vitest@5.1.0)
-      typescript:
-        specifier: 'catalog:'
-        version: 6.0.3
-      vite:
-        specifier: 'catalog:'
-        version: '@voidzero-dev/vite-plus-core@1.5.0(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.9.1)'
-      vitest:
-        specifier: 'catalog:'
-        version: 5.1.0(@types/node@24.19.2)(@vitest/browser-preview@5.1.0)(@vitest/ui@5.1.0)(@voidzero-dev/vite-plus-core@1.5.0(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.9.1))
-
-  packages/source-wikidata:
+  packages/source-thetvdb:
     dependencies:
       '@blue-orchid/core':
         specifier: workspace:*
