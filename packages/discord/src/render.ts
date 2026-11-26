@@ -2,7 +2,7 @@ import type { Reply, ReplyKind } from "@blue-orchid/core";
 import type { APIContainerComponent } from "discord-api-types/v10";
 import { Match } from "effect";
 
-import { accent, clip, escape, notice } from "./views/blocks.ts";
+import { accent, clip, credit, escape, notice } from "./views/blocks.ts";
 import { chooseView } from "./views/choose.ts";
 import { followedView } from "./views/followed.ts";
 import { followingView } from "./views/following.ts";
@@ -26,5 +26,18 @@ const views: Views = {
   Trouble: () => notice(accent.error, "Something went wrong on our side", "Try again in a minute."),
 };
 
+/** Replies that show catalog data, so they carry TheTVDB's credit. */
+const credited: ReadonlySet<ReplyKind> = new Set([
+  "Schedule",
+  "Followed",
+  "Unfollowed",
+  "Choose",
+  "Following",
+  "ShowUpdate",
+]);
+
 /** A reply as the components of a Components V2 message. */
-export const renderReply = (reply: Reply): Array<APIContainerComponent> => [Match.valueTags(reply, views)];
+export const renderReply = (reply: Reply): Array<APIContainerComponent> => {
+  const view = Match.valueTags(reply, views);
+  return [credited.has(reply._tag) ? { ...view, components: [...view.components, credit] } : view];
+};

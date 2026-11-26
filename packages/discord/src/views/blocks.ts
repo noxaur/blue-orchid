@@ -177,6 +177,9 @@ export const container = (
   components: ReadonlyArray<APIComponentInContainer>,
 ): APIContainerComponent => ({ type: ComponentType.Container, accent_color: color, components: [...components] });
 
+/** TheTVDB's licence asks for this credit, with a link, wherever its data is shown. */
+export const credit = text("-# Metadata provided by [TheTVDB](https://thetvdb.com/)");
+
 /** A short message: a heading and a grey line under it. */
 export const notice = (color: number, heading: string, detail: string) =>
   container(color, [text(`### ${heading}\n-# ${detail}`)]);
